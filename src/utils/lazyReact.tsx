@@ -8,7 +8,7 @@ import { ComponentType } from "react";
 
 import { makeLazy } from "./lazy";
 
-const NoopComponent = () => null;
+export const NoopComponent = () => null;
 
 /**
  * A lazy component. The factory method is called on first render.
@@ -23,7 +23,7 @@ export function LazyComponent<T extends object = any>(factory: () => React.Compo
         return <Component {...props} />;
     };
 
-    LazyComponent.$$vencordInternal = get;
+    LazyComponent.$$vencordGetter = get;
 
     return LazyComponent as ComponentType<T>;
 }

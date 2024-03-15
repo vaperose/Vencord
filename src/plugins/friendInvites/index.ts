@@ -19,11 +19,11 @@
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { waitForPropsLazy } from "@webpack";
 import { RestAPI, UserStore } from "@webpack/common";
 
-const FriendInvites = findByPropsLazy("createFriendInvite");
-const { uuid4 } = findByPropsLazy("uuid4");
+const FriendInvites = waitForPropsLazy("createFriendInvite");
+const { uuid4 } = waitForPropsLazy("uuid4");
 
 export default definePlugin({
     name: "FriendInvites",

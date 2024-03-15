@@ -20,7 +20,7 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { waitForPropsLazy } from "@webpack";
 import { useCallback, useEffect, useRef, useState } from "@webpack/common";
 
 interface SearchBarComponentProps {
@@ -60,7 +60,7 @@ interface Instance {
 }
 
 
-const containerClasses: { searchBar: string; } = findByPropsLazy("searchBar", "searchBarFullRow");
+const containerClasses: { searchBar: string; } = waitForPropsLazy("searchBar", "searchBarFullRow");
 
 export const settings = definePluginSettings({
     searchOption: {

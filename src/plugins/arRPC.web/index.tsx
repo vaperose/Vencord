@@ -20,10 +20,10 @@ import { popNotice, showNotice } from "@api/Notices";
 import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { waitForPropsLazy } from "@webpack";
 import { ApplicationAssetUtils, FluxDispatcher, Forms, Toasts } from "@webpack/common";
 
-const RpcUtils = findByPropsLazy("fetchApplicationsRPC", "getRemoteIconURL");
+const RpcUtils = waitForPropsLazy("fetchApplicationsRPC", "getRemoteIconURL");
 
 async function lookupAsset(applicationId: string, key: string): Promise<string> {
     return (await ApplicationAssetUtils.fetchAssetIds(applicationId, [key]))[0];

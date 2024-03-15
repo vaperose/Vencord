@@ -16,10 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { waitFor } from "@webpack";
+import { waitForLazy } from "@webpack";
 
-let NoticesModule: any;
-waitFor(m => m.show && m.dismiss && !m.suppressAll, m => NoticesModule = m);
+const NoticesModule = waitForLazy(m => m.show && m.dismiss && !m.suppressAll, m => m);
 
 export const noticesQueue = [] as any[];
 export let currentNotice: any = null;

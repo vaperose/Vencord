@@ -20,15 +20,15 @@ import { definePluginSettings, Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findExportedComponentLazy, findStoreLazy } from "@webpack";
+import { waitForExportedComponent, waitForStoreLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, i18n, RelationshipStore, SelectedChannelStore, Tooltip, UserStore, useStateFromStores } from "@webpack/common";
 
 import { buildSeveralUsers } from "../typingTweaks";
 
-const ThreeDots = findExportedComponentLazy("Dots", "AnimatedDots");
+const ThreeDots = waitForExportedComponent("Dots", "AnimatedDots");
 
-const TypingStore = findStoreLazy("TypingStore");
-const UserGuildSettingsStore = findStoreLazy("UserGuildSettingsStore");
+const TypingStore = waitForStoreLazy("TypingStore");
+const UserGuildSettingsStore = waitForStoreLazy("UserGuildSettingsStore");
 
 function getDisplayName(guildId: string, userId: string) {
     const user = UserStore.getUser(userId);

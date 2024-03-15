@@ -23,7 +23,7 @@ import { Devs } from "@utils/constants.js";
 import { classes } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { waitForComponentByCode, waitForPropsLazy } from "@webpack";
 import {
     Button,
     ChannelStore,
@@ -46,12 +46,12 @@ const messageCache = new Map<string, {
     fetched: boolean;
 }>();
 
-const Embed = findComponentByCodeLazy(".inlineMediaEmbed");
-const AutoModEmbed = findComponentByCodeLazy(".withFooter]:", "childrenMessageContent:");
-const ChannelMessage = findComponentByCodeLazy("renderSimpleAccessories)");
+const Embed = waitForComponentByCode(".inlineMediaEmbed");
+const AutoModEmbed = waitForComponentByCode(".withFooter]:", "childrenMessageContent:");
+const ChannelMessage = waitForComponentByCode("renderSimpleAccessories)");
 
-const SearchResultClasses = findByPropsLazy("message", "searchResult");
-const EmbedClasses = findByPropsLazy("embedAuthorIcon", "embedAuthor", "embedAuthor");
+const SearchResultClasses = waitForPropsLazy("message", "searchResult");
+const EmbedClasses = waitForPropsLazy("embedAuthorIcon", "embedAuthor", "embedAuthor");
 
 const messageLinkRegex = /(?<!<)https?:\/\/(?:\w+\.)?discord(?:app)?\.com\/channels\/(?:\d{17,20}|@me)\/(\d{17,20})\/(\d{17,20})/g;
 const tenorRegex = /^https:\/\/(?:www\.)?tenor\.com\//;

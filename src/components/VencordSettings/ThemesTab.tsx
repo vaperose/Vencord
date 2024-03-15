@@ -29,7 +29,7 @@ import { classes } from "@utils/misc";
 import { openModal } from "@utils/modal";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { findByPropsLazy, findLazy } from "@webpack";
+import { waitForLazy, waitForPropsLazy } from "@webpack";
 import { Button, Card, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
 import type { ComponentType, Ref, SyntheticEvent } from "react";
 
@@ -43,9 +43,9 @@ type FileInput = ComponentType<{
     filters?: { name?: string; extensions: string[]; }[];
 }>;
 
-const InviteActions = findByPropsLazy("resolveInvite");
-const FileInput: FileInput = findLazy(m => m.prototype?.activateUploadDialogue && m.prototype.setRef);
-const TextAreaProps = findLazy(m => typeof m.textarea === "string");
+const InviteActions = waitForPropsLazy("resolveInvite");
+const FileInput = waitForLazy<FileInput>(m => m.prototype?.activateUploadDialogue && m.prototype.setRef);
+const TextAreaProps = waitForLazy(m => typeof m.textarea === "string");
 
 const cl = classNameFactory("vc-settings-theme-");
 

@@ -20,6 +20,8 @@ import { proxyLazy } from "@utils/lazy";
 import { LazyComponent } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
+import { proxyInner } from "@utils/proxyInner";
+import { NoopComponent } from "@utils/react";
 import type { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
@@ -39,39 +41,58 @@ export let cache: WebpackInstance["c"];
 export type FilterFn = (mod: any) => boolean;
 
 export const filters = {
-    byProps: (...props: string[]): FilterFn =>
-        props.length === 1
-            ? m => m[props[0]] !== void 0
-            : m => props.every(p => m[p] !== void 0),
+    byProps: (...props: string[]): FilterFn => {
+        const filter = props.length === 1
+            ? m => m?.[props[0]] !== void 0
+            : m => props.every(p => m?.[p] !== void 0);
 
-    byCode: (...code: string[]): FilterFn => m => {
-        if (typeof m !== "function") return false;
-        const s = Function.prototype.toString.call(m);
-        for (const c of code) {
-            if (!s.includes(c)) return false;
-        }
-        return true;
+        // @ts-ignore
+        filter.$$vencordProps = props;
+        return filter;
     },
-    byStoreName: (name: string): FilterFn => m =>
-        m.constructor?.displayName === name,
+
+    byCode: (...code: string[]): FilterFn => {
+        const filter = m => {
+            if (typeof m !== "function") return false;
+            const s = Function.prototype.toString.call(m);
+            for (const c of code) {
+                if (!s.includes(c)) return false;
+            }
+            return true;
+        };
+
+        filter.$$vencordProps = code;
+        return filter;
+    },
+
+    byStoreName: (name: string): FilterFn => {
+        const filter = m => m?.constructor?.displayName === name;
+
+        filter.$$vencordProps = [name];
+        return filter;
+    },
 
     componentByCode: (...code: string[]): FilterFn => {
         const filter = filters.byCode(...code);
-        return m => {
+        const wrapper = m => {
             if (filter(m)) return true;
-            if (!m.$$typeof) return false;
-            if (m.type && m.type.render) return filter(m.type.render); // memo + forwardRef
-            if (m.type) return filter(m.type); // memos
-            if (m.render) return filter(m.render); // forwardRefs
+            if (!m?.$$typeof) return false;
+            if (m?.type && m.type.render) return filter(m.type.render); // memo + forwardRef
+            if (m?.type) return filter(m.type); // memos
+            if (m?.render) return filter(m.render); // forwardRefs
             return false;
         };
+
+        wrapper.$$vencordProps = code;
+        return wrapper;
     }
 };
 
-export const subscriptions = new Map<FilterFn, CallbackFn>();
-export const listeners = new Set<CallbackFn>();
+export type ModCallbackFn = (mod: any) => void;
+export type ModCallbackFnWithId = (mod: any, id: string) => void;
 
-export type CallbackFn = (mod: any, id: string) => void;
+export const waitForSubscriptions = new Map<FilterFn, ModCallbackFn>();
+export const listeners = new Set<ModCallbackFnWithId>();
 
 export function _initWebpack(instance: typeof window.webpackChunkdiscord_app) {
     if (cache !== void 0) throw "no.";
@@ -92,6 +113,8 @@ if (IS_DEV && IS_DISCORD_DESKTOP) {
     }, 0);
 }
 
+export const lazyWebpackSearchHistory = [] as Array<["find" | "findByProps" | "findByCode" | "findStore" | "findComponent" | "findComponentByCode" | "findExportedComponent" | "waitFor" | "waitForComponent" | "waitForExportedComponent" | "waitForComponentByCode" | "waitForProps" | "waitForCode" | "waitForStore" | "proxyLazyWebpack" | "LazyComponentWebpack" | "extractAndLoadChunks", any[]]>;
+
 function handleModuleNotFound(method: string, ...filter: unknown[]) {
     const err = new Error(`webpack.${method} found no module`);
     logger.error(err, "Filter:", filter);
@@ -104,7 +127,7 @@ function handleModuleNotFound(method: string, ...filter: unknown[]) {
 /**
  * Find the first module that matches the filter
  */
-export const find = traceFunction("find", function find(filter: FilterFn, { isIndirect = false, isWaitFor = false }: { isIndirect?: boolean; isWaitFor?: boolean; } = {}) {
+export const find = traceFunction("find", function find(filter: FilterFn, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
@@ -113,12 +136,12 @@ export const find = traceFunction("find", function find(filter: FilterFn, { isIn
         if (!mod?.exports) continue;
 
         if (filter(mod.exports)) {
-            return isWaitFor ? [mod.exports, key] : mod.exports;
+            return mod.exports;
         }
 
         if (mod.exports.default && filter(mod.exports.default)) {
             const found = mod.exports.default;
-            return isWaitFor ? [found, key] : found;
+            return found;
         }
     }
 
@@ -126,8 +149,133 @@ export const find = traceFunction("find", function find(filter: FilterFn, { isIn
         handleModuleNotFound("find", filter);
     }
 
-    return isWaitFor ? [null, null] : null;
+    return null;
 });
+
+
+/**
+ * Wait for a module that matches the provided filter to be required,
+ * then call the callback with the module as the first argument
+ */
+export function waitFor(filter: FilterFn, callback: ModCallbackFn, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
+    if (IS_DEV && !isIndirect) lazyWebpackSearchHistory.push(["waitFor", [filter]]);
+
+    if (cache != null) {
+        const existing = find(filter, { isIndirect: true });
+        if (existing) return callback(existing);
+    }
+
+    waitForSubscriptions.set(filter, callback);
+}
+
+/**
+ * Wait for a component that matches the provided filter to be required
+ * and modify the inner noop component to be the found component
+ * @returns A component to render both the real and the noop component, if the filter did not have a match
+ */
+export function waitForComponent<T extends React.ComponentType<any> = React.ComponentType<any>>(filter: FilterFn, parse: (component: any) => T = m => m, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
+    if (IS_DEV && !isIndirect) lazyWebpackSearchHistory.push(["waitForComponent", [filter]]);
+
+    let InnerComponent = NoopComponent as any as T;
+
+    const LazyComponent = (props: any) => {
+        return <InnerComponent {...props} />;
+    };
+
+    LazyComponent.$$vencordGetter = () => InnerComponent;
+
+    waitFor(filter, (v: any) => {
+        const parsedComponent = parse(v);
+        InnerComponent = parsedComponent;
+        Object.assign(InnerComponent, parsedComponent);
+    }, { isIndirect: true });
+
+    return LazyComponent as any as T;
+}
+
+/**
+ * Wait for a component that is exported by the first prop name to be required
+ * and assign the inner noop component to the found component
+ * @returns A component to render both the real and the noop component, if the filter did not have a match
+ */
+export function waitForExportedComponent<T extends React.ComponentType<any> = React.ComponentType<any>>(...props: string[]) {
+    if (IS_DEV) lazyWebpackSearchHistory.push(["waitForExportedComponent", props]);
+
+    let InnerComponent = NoopComponent as any as T;
+
+    const LazyComponent = (props: any) => {
+        return <InnerComponent {...props} />;
+    };
+
+    LazyComponent.$$vencordGetter = () => InnerComponent;
+
+    waitFor(filters.byProps(...props), (v: any) => {
+        InnerComponent = v[props[0]];
+        Object.assign(InnerComponent, v[props[0]]);
+    }, { isIndirect: true });
+
+    return LazyComponent as any as T;
+}
+
+/**
+ * Wait for a component that is includes the given code to be required
+ * and assign the inner noop component to the found component
+ * @returns A component to render both the real and the noop component, if the filter did not have a match
+ */
+export function waitForComponentByCode<T extends React.ComponentType<any> = React.ComponentType<any>>(...code: string[]) {
+    if (IS_DEV) lazyWebpackSearchHistory.push(["waitForComponentByCode", code]);
+
+    return waitForComponent<T>(filters.componentByCode(...code), m => m, { isIndirect: true });
+}
+
+/**
+ * Wait for a module that matches the provided filter to be required,
+ * then call the callback with the module as the first argument.
+ *
+ * If no callback is specified, the default callback will assign the proxy inner value to all the module
+ * The callback must return a value that will be used as the proxy inner value.
+ * @returns A proxy that has the callback return value as its true value
+ */
+export function waitForLazy<T = any>(filter: FilterFn, callback: (mod: any) => any = m => m, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
+    const [proxy, setInnerValue] = proxyInner<T>();
+
+    waitFor(filter, mod => setInnerValue(callback(mod)), { isIndirect });
+
+    return proxy;
+}
+
+/**
+ * Wait for a module that includes the given props to be required
+ * and assign the inner value to it
+ * @returns A proxy that has the found module as its true value
+ */
+export function waitForPropsLazy<T = any>(...props: string[]) {
+    if (IS_DEV) lazyWebpackSearchHistory.push(["waitForProps", props]);
+
+    return waitForLazy<T>(filters.byProps(...props), m => m, { isIndirect: true });
+}
+
+/**
+ * Wait for a module that includes the given code to be required
+ * and assign the inner value to it
+ * @returns A proxy that has the found module as its true value
+ */
+export function waitForCodeLazy<T = any>(...code: string[]) {
+    if (IS_DEV) lazyWebpackSearchHistory.push(["waitForCode", code]);
+
+    return waitForLazy<T>(filters.byCode(...code), m => m, { isIndirect: true });
+}
+
+/**
+ * Wait for a store which has the given name to be required,
+ * and assign the inner value to it
+ * @returns A proxy that has the found store as its true value
+ */
+export function waitForStoreLazy<T = any>(name: string) {
+    if (IS_DEV) lazyWebpackSearchHistory.push(["waitForStore", [name]]);
+
+    return waitForLazy<T>(filters.byStoreName(name), m => m, { isIndirect: true });
+}
 
 export function findAll(filter: FilterFn) {
     if (typeof filter !== "function")
@@ -253,8 +401,6 @@ export function findModuleFactory(...code: string[]) {
     return wreq.m[id];
 }
 
-export const lazyWebpackSearchHistory = [] as Array<["find" | "findByProps" | "findByCode" | "findStore" | "findComponent" | "findComponentByCode" | "findExportedComponent" | "waitFor" | "waitForComponent" | "waitForStore" | "proxyLazyWebpack" | "LazyComponentWebpack" | "extractAndLoadChunks", any[]]>;
-
 /**
  * This is just a wrapper around {@link proxyLazy} to make our reporter test for your webpack finds.
  *
@@ -264,7 +410,7 @@ export const lazyWebpackSearchHistory = [] as Array<["find" | "findByProps" | "f
  * @param attempts how many times to try to evaluate the lazy before giving up
  * @returns Proxy
  *
- * Note that the example below exists already as an api, see {@link findByPropsLazy}
+ * Note that the example below exists already as an api, see {@link waitForPropsLazy}
  * @example const mod = proxyLazy(() => findByProps("blah")); console.log(mod.blah);
  */
 export function proxyLazyWebpack<T = any>(factory: () => any, attempts?: number) {
@@ -460,36 +606,6 @@ export function extractAndLoadChunksLazy(code: string[], matcher: RegExp = /\.el
     if (IS_DEV) lazyWebpackSearchHistory.push(["extractAndLoadChunks", [code, matcher]]);
 
     return () => extractAndLoadChunks(code, matcher);
-}
-
-/**
- * Wait for a module that matches the provided filter to be registered,
- * then call the callback with the module as the first argument
- */
-export function waitFor(filter: string | string[] | FilterFn, callback: CallbackFn, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
-    if (IS_DEV && !isIndirect) lazyWebpackSearchHistory.push(["waitFor", Array.isArray(filter) ? filter : [filter]]);
-
-    if (typeof filter === "string")
-        filter = filters.byProps(filter);
-    else if (Array.isArray(filter))
-        filter = filters.byProps(...filter);
-    else if (typeof filter !== "function")
-        throw new Error("filter must be a string, string[] or function, got " + typeof filter);
-
-    if (cache != null) {
-        const [existing, id] = find(filter, { isIndirect: true, isWaitFor: true });
-        if (existing) return void callback(existing, id);
-    }
-
-    subscriptions.set(filter, callback);
-}
-
-export function addListener(callback: CallbackFn) {
-    listeners.add(callback);
-}
-
-export function removeListener(callback: CallbackFn) {
-    listeners.delete(callback);
 }
 
 /**

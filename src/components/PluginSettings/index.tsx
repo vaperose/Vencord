@@ -33,7 +33,7 @@ import { classes, isObjectEmpty } from "@utils/misc";
 import { openModalLazy } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
 import { Plugin } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { waitForPropsLazy } from "@webpack";
 import { Alerts, Button, Card, Forms, lodash, Parser, React, Select, Text, TextInput, Toasts, Tooltip } from "@webpack/common";
 
 import Plugins from "~plugins";
@@ -44,8 +44,8 @@ import { startDependenciesRecursive, startPlugin, stopPlugin } from "../../plugi
 const cl = classNameFactory("vc-plugins-");
 const logger = new Logger("PluginSettings", "#a6d189");
 
-const InputStyles = findByPropsLazy("inputDefault", "inputWrapper");
-const ButtonClasses = findByPropsLazy("button", "disabled", "enabled");
+const InputStyles = waitForPropsLazy("inputDefault", "inputWrapper");
+const ButtonClasses = waitForPropsLazy("button", "disabled", "enabled");
 
 
 function showErrorToast(message: string) {

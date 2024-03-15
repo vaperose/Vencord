@@ -22,13 +22,13 @@ import { sleep } from "@utils/misc";
 import { Queue } from "@utils/Queue";
 import { useForceUpdater } from "@utils/react";
 import definePlugin from "@utils/types";
-import { findByPropsLazy, findComponentByCodeLazy } from "@webpack";
+import { waitForComponentByCode, waitForPropsLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, React, RestAPI, Tooltip } from "@webpack/common";
 import { CustomEmoji } from "@webpack/types";
 import { Message, ReactionEmoji, User } from "discord-types/general";
 
-const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaultAvatarsForNullUsers");
-const AvatarStyles = findByPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
+const UserSummaryItem = waitForComponentByCode("defaultRenderUser", "showDefaultAvatarsForNullUsers");
+const AvatarStyles = waitForPropsLazy("moreUsers", "emptyUser", "avatarContainer", "clickableAvatar");
 
 const queue = new Queue();
 let reactions: Record<string, ReactionCacheEntry>;

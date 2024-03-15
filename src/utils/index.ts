@@ -33,3 +33,4 @@ export * from "./patches";
 export * from "./Queue";
 export * from "./react";
 export * from "./text";
+export * from "./proxyInner";

@@ -108,7 +108,7 @@ function patchPush(webpackGlobal: any) {
 }
 
 function patchFactories(factories: Record<string | number, (module: { exports: any; }, exports: any, require: any) => void>) {
-    const { subscriptions, listeners } = Vencord.Webpack;
+    const { waitForSubscriptions, listeners } = Vencord.Webpack;
     const { patches } = Vencord.Plugins;
 
     for (const id in factories) {
@@ -161,17 +161,17 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
                 }
             }
 
-            for (const [filter, callback] of subscriptions) {
+            for (const [filter, callback] of waitForSubscriptions) {
                 try {
                     if (filter(exports)) {
-                        subscriptions.delete(filter);
-                        callback(exports, id);
+                        waitForSubscriptions.delete(filter);
+                        callback(exports);
                     } else if (exports.default && filter(exports.default)) {
-                        subscriptions.delete(filter);
-                        callback(exports.default, id);
+                        waitForSubscriptions.delete(filter);
+                        callback(exports.default);
                     }
                 } catch (err) {
-                    logger.error("Error while firing callback for webpack chunk", err);
+                    logger.error("Error while firing callback for webpack waitFor subscription", err);
                 }
             }
         } as any as { toString: () => string, original: any, (...args: any[]): void; };

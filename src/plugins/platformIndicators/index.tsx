@@ -23,11 +23,11 @@ import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy, findStoreLazy } from "@webpack";
+import { waitForPropsLazy,waitForStoreLazy } from "@webpack";
 import { PresenceStore, Tooltip, UserStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
-const SessionsStore = findStoreLazy("SessionsStore");
+const SessionsStore = waitForStoreLazy("SessionsStore");
 
 function Icon(path: string, opts?: { viewBox?: string; width?: number; height?: number; }) {
     return ({ color, tooltip, small }: { color: string; tooltip: string; small: boolean; }) => (
@@ -55,7 +55,7 @@ const Icons = {
 };
 type Platform = keyof typeof Icons;
 
-const StatusUtils = findByPropsLazy("useStatusFillColor", "StatusTypes");
+const StatusUtils = waitForPropsLazy("useStatusFillColor", "StatusTypes");
 
 const PlatformIcon = ({ platform, status, small }: { platform: Platform, status: string; small: boolean; }) => {
     const tooltip = platform[0].toUpperCase() + platform.slice(1);

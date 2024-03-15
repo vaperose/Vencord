@@ -17,9 +17,8 @@
 */
 
 // eslint-disable-next-line path-alias/no-relative
-import { filters, findByPropsLazy, waitFor } from "@webpack";
+import { filters, waitFor, waitForComponent, waitForExportedComponent } from "@webpack";
 
-import { waitForComponent } from "./internal";
 import * as t from "./types/components";
 
 export let Forms = {} as {
@@ -51,13 +50,13 @@ export let Avatar: t.Avatar;
 /** css colour resolver stuff, no clue what exactly this does, just copied usage from Discord */
 export let useToken: t.useToken;
 
-export const MaskedLink = waitForComponent<t.MaskedLink>("MaskedLink", filters.componentByCode("MASKED_LINK)"));
-export const Timestamp = waitForComponent<t.Timestamp>("Timestamp", filters.byCode(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));
-export const Flex = waitForComponent<t.Flex>("Flex", ["Justify", "Align", "Wrap"]);
-
-export const { OAuth2AuthorizeModal } = findByPropsLazy("OAuth2AuthorizeModal");
-
-waitFor(["FormItem", "Button"], m => {
-    ({ useToken, Card, Button, FormSwitch: Switch, Tooltip, TextInput, TextArea, Text, Select, SearchableSelect, Slider, ButtonLooks, TabBar, Popout, Dialog, Paginator, ScrollerThin, Clickable, Avatar } = m);
+waitFor(filters.byProps("FormItem", "Button"), m => {
     Forms = m;
+    ({ useToken, Card, Button, FormSwitch: Switch, Tooltip, TextInput, TextArea, Text, Select, SearchableSelect, Slider, ButtonLooks, TabBar, Popout, Dialog, Paginator, ScrollerThin, Clickable, Avatar } = m);
 });
+
+export const MaskedLink = waitForComponent<t.MaskedLink>(filters.componentByCode("MASKED_LINK)"));
+export const Timestamp = waitForComponent<t.Timestamp>(filters.componentByCode(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));
+export const Flex = waitForComponent<t.Flex>(filters.byProps("Justify", "Align", "Wrap"));
+
+export const OAuth2AuthorizeModal = waitForExportedComponent("OAuth2AuthorizeModal");

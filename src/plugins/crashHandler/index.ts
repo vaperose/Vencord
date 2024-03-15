@@ -23,25 +23,14 @@ import { Logger } from "@utils/Logger";
 import { closeAllModals } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { maybePromptToUpdate } from "@utils/updater";
-import { filters, findBulk, proxyLazyWebpack } from "@webpack";
+import { waitForPropsLazy } from "@webpack";
 import { FluxDispatcher, NavigationRouter, SelectedChannelStore } from "@webpack/common";
 
 const CrashHandlerLogger = new Logger("CrashHandler");
-const { ModalStack, DraftManager, DraftType, closeExpressionPicker } = proxyLazyWebpack(() => {
-    const modules = findBulk(
-        filters.byProps("pushLazy", "popAll"),
-        filters.byProps("clearDraft", "saveDraft"),
-        filters.byProps("DraftType"),
-        filters.byProps("closeExpressionPicker", "openExpressionPicker"),
-    );
-
-    return {
-        ModalStack: modules[0],
-        DraftManager: modules[1],
-        DraftType: modules[2]?.DraftType,
-        closeExpressionPicker: modules[3]?.closeExpressionPicker,
-    };
-});
+const ModalStack = waitForPropsLazy("pushLazy", "popAll");
+const DraftManager = waitForPropsLazy("clearDraft", "saveDraft");
+const { DraftType } = waitForPropsLazy("DraftType");
+const { closeExpressionPicker } = waitForPropsLazy("closeExpressionPicker", "openExpressionPicker");
 
 const settings = definePluginSettings({
     attemptToPreventCrashes: {

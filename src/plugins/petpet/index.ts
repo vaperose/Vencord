@@ -20,7 +20,7 @@ import { ApplicationCommandInputType, ApplicationCommandOptionType, Argument, Co
 import { Devs } from "@utils/constants";
 import { makeLazy } from "@utils/lazy";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { waitForPropsLazy } from "@webpack";
 import { UploadHandler, UserUtils } from "@webpack/common";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 
@@ -36,7 +36,7 @@ const getFrames = makeLazy(() => Promise.all(
     ))
 );
 
-const UploadStore = findByPropsLazy("getUploads");
+const UploadStore = waitForPropsLazy("getUploads");
 
 function loadImage(source: File | string) {
     const isFile = source instanceof File;

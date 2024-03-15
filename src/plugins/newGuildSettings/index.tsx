@@ -16,14 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings,migratePluginSettings } from "@api/Settings";
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { waitForPropsLazy } from "@webpack";
 
-const { updateGuildNotificationSettings } = findByPropsLazy("updateGuildNotificationSettings");
-const { toggleShowAllChannels } = findByPropsLazy("toggleShowAllChannels");
-const { isOptInEnabledForGuild } = findByPropsLazy("isOptInEnabledForGuild");
+const { updateGuildNotificationSettings } = waitForPropsLazy("updateGuildNotificationSettings");
+const { toggleShowAllChannels } = waitForPropsLazy("toggleShowAllChannels");
+const { isOptInEnabledForGuild } = waitForPropsLazy("isOptInEnabledForGuild");
 
 const settings = definePluginSettings({
     guild: {

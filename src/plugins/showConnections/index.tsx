@@ -25,17 +25,17 @@ import { CopyIcon, LinkIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
+import { waitForCodeLazy, waitForComponentByCode, waitForPropsLazy,waitForStoreLazy } from "@webpack";
 import { Text, Tooltip, UserProfileStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { VerifiedIcon } from "./VerifiedIcon";
 
-const Section = findComponentByCodeLazy(".lastSection", "children:");
-const ThemeStore = findStoreLazy("ThemeStore");
-const platformHooks: { useLegacyPlatformType(platform: string): string; } = findByPropsLazy("useLegacyPlatformType");
-const platforms: { get(type: string): ConnectionPlatform; } = findByPropsLazy("isSupported", "getByUrl");
-const getTheme: (user: User, displayProfile: any) => any = findByCodeLazy(',"--profile-gradient-primary-color"');
+const Section = waitForComponentByCode(".lastSection", "children:");
+const ThemeStore = waitForStoreLazy("ThemeStore");
+const platformHooks: { useLegacyPlatformType(platform: string): string; } = waitForPropsLazy("useLegacyPlatformType");
+const platforms: { get(type: string): ConnectionPlatform; } = waitForPropsLazy("isSupported", "getByUrl");
+const getTheme: (user: User, displayProfile: any) => any = waitForCodeLazy(',"--profile-gradient-primary-color"');
 
 const enum Spacing {
     COMPACT,

@@ -7,10 +7,10 @@
 import { Devs } from "@utils/constants";
 import { getCurrentGuild } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
+import { waitForPropsLazy } from "@webpack";
 import { Clipboard, GuildStore, Menu, PermissionStore, TextAndImagesSettingsStores } from "@webpack/common";
 
-const GuildSettingsActions = findByPropsLazy("open", "selectRole", "updateGuild");
+const GuildSettingsActions = waitForPropsLazy("open", "selectRole", "updateGuild");
 
 function PencilIcon() {
     return (

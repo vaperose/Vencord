@@ -310,7 +310,7 @@ function runTime(token: string) {
         });
 
         Vencord.Webpack.waitFor(
-            "loginToken",
+            Vencord.Webpack.filters.byProps("loginToken"),
             m => {
                 console.log("[PUP_DEBUG]", "Logging in with token...");
                 m.loginToken(token);
@@ -426,12 +426,10 @@ function runTime(token: string) {
             for (const [searchType, args] of Vencord.Webpack.lazyWebpackSearchHistory) {
                 let method = searchType;
 
-                if (searchType === "findComponent") method = "find";
-                if (searchType === "findExportedComponent") method = "findByProps";
-                if (searchType === "waitFor" || searchType === "waitForComponent") {
-                    if (typeof args[0] === "string") method = "findByProps";
-                    else method = "find";
-                }
+                if (searchType === "findComponent" || searchType === "waitFor" || searchType === "waitForComponent") method = "find";
+                if (searchType === "findExportedComponent" || searchType === "waitForExportedComponent" || searchType === "waitForProps") method = "findByProps";
+                if (searchType === "waitForComponentByCode") method = "findComponentByCode";
+                if (searchType === "waitForCode") method = "findByCode";
                 if (searchType === "waitForStore") method = "findStore";
 
                 try {
@@ -450,12 +448,14 @@ function runTime(token: string) {
                         result = Vencord.Webpack[method](...args);
                     }
 
-                    if (result == null || ("$$vencordInternal" in result && result.$$vencordInternal() == null)) throw "a rock at ben shapiro";
+                    if (result == null || ("$$vencordGetter" in result && result.$$vencordGetter() == null)) throw "a rock at ben shapiro";
                 } catch (e) {
                     let logMessage = searchType;
-                    if (method === "find" || method === "proxyLazyWebpack" || method === "LazyComponentWebpack") logMessage += `(${args[0].toString().slice(0, 147)}...)`;
-                    else if (method === "extractAndLoadChunks") logMessage += `([${args[0].map(arg => `"${arg}"`).join(", ")}], ${args[1].toString()})`;
-                    else logMessage += `(${args.map(arg => `"${arg}"`).join(", ")})`;
+                    const parsedArgs: any[] = "$$vencordProps" in args[0] ? args[0].$$vencordProps : args;
+
+                    if (!("$$vencordProps" in args[0]) && method === "find" || method === "proxyLazyWebpack" || method === "LazyComponentWebpack") logMessage += `(${parsedArgs[0].toString().slice(0, 147)}...)`;
+                    else if (method === "extractAndLoadChunks") logMessage += `([${parsedArgs[0].map(arg => `"${arg}"`).join(", ")}], ${parsedArgs[1].toString()})`;
+                    else logMessage += `(${parsedArgs.map(arg => `"${arg}"`).join(", ")})`;
 
                     console.log("[PUP_WEBPACK_FIND_FAIL]", logMessage);
                 }

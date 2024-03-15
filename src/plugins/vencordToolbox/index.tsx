@@ -23,11 +23,11 @@ import { Settings, useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findExportedComponentLazy } from "@webpack";
+import { waitForExportedComponent } from "@webpack";
 import { Menu, Popout, useState } from "@webpack/common";
 import type { ReactNode } from "react";
 
-const HeaderBarIcon = findExportedComponentLazy("Icon", "Divider");
+const HeaderBarIcon = waitForExportedComponent("Icon", "Divider");
 
 function VencordPopout(onClose: () => void) {
     const { useQuickCss } = useSettings(["useQuickCss"]);
