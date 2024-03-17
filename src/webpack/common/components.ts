@@ -46,17 +46,19 @@ export let Paginator: t.Paginator;
 export let ScrollerThin: t.ScrollerThin;
 export let Clickable: t.Clickable;
 export let Avatar: t.Avatar;
+export let FocusLock: t.FocusLock;
 // token lagger real
 /** css colour resolver stuff, no clue what exactly this does, just copied usage from Discord */
 export let useToken: t.useToken;
-
-waitFor(filters.byProps("FormItem", "Button"), m => {
-    Forms = m;
-    ({ useToken, Card, Button, FormSwitch: Switch, Tooltip, TextInput, TextArea, Text, Select, SearchableSelect, Slider, ButtonLooks, TabBar, Popout, Dialog, Paginator, ScrollerThin, Clickable, Avatar } = m);
-});
 
 export const MaskedLink = findComponent<t.MaskedLinkProps>(filters.componentByCode("MASKED_LINK)"));
 export const Timestamp = findComponent<t.TimestampProps>(filters.componentByCode(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));
 export const Flex = findComponent<t.FlexProps>(filters.byProps("Justify", "Align", "Wrap"));
 
 export const OAuth2AuthorizeModal = findExportedComponent("OAuth2AuthorizeModal");
+
+waitFor(filters.byProps("FormItem", "Button"), m => {
+    Forms = m;
+    ({ useToken, Card, Button, FormSwitch: Switch, Tooltip, TextInput, TextArea, Text, Select, SearchableSelect, Slider, ButtonLooks, TabBar, Popout, Dialog, Paginator, ScrollerThin, Clickable, Avatar, FocusLock } = m);
+});
+
