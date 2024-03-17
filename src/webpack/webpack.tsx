@@ -201,7 +201,7 @@ export function proxyInnerWaitFor<T = any>(filter: FilterFn, callback: (mod: any
     const [proxy, setInnerValue] = proxyInner<T>();
     waitFor(filter, mod => setInnerValue(callback(mod)), { isIndirect: true });
 
-    if (proxy[proxyInnerValue] != null) return proxy[proxyInnerValue];
+    if (proxy[proxyInnerValue] != null) return proxy[proxyInnerValue] as T;
 
     return proxy;
 }
