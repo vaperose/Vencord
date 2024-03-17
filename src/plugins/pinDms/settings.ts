@@ -18,7 +18,7 @@
 
 import { definePluginSettings, Settings, useSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
-import { waitForStoreLazy } from "@webpack";
+import { findStore } from "@webpack";
 
 export const enum PinOrder {
     LastMessage,
@@ -36,7 +36,7 @@ export const settings = definePluginSettings({
     }
 });
 
-const PrivateChannelSortStore = waitForStoreLazy("PrivateChannelSortStore");
+const PrivateChannelSortStore = findStore("PrivateChannelSortStore");
 
 export let snapshotArray: string[];
 let snapshot: Set<string> | undefined;

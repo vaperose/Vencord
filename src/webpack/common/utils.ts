@@ -19,10 +19,10 @@
 import type { Channel, User } from "discord-types/general";
 
 // eslint-disable-next-line path-alias/no-relative
-import { _resolveReady, filters, waitFor, waitForCodeLazy, waitForLazy, waitForPropsLazy } from "../webpack";
+import { _resolveReady, filters, findByCode, findByProps, proxyInnerWaitFor,waitFor } from "../webpack";
 import type * as t from "./types/utils";
 
-export const FluxDispatcher = waitForLazy<t.FluxDispatcher>(filters.byProps("dispatch", "subscribe"), m => {
+export const FluxDispatcher = proxyInnerWaitFor<t.FluxDispatcher>(filters.byProps("dispatch", "subscribe"), m => {
     const cb = () => {
         m.unsubscribe("CONNECTION_OPEN", cb);
         _resolveReady();
@@ -32,21 +32,21 @@ export const FluxDispatcher = waitForLazy<t.FluxDispatcher>(filters.byProps("dis
     return m;
 });
 
-export const { ComponentDispatch } = waitForPropsLazy("ComponentDispatch", "ComponentDispatcher");
+export const { ComponentDispatch } = findByProps("ComponentDispatch", "ComponentDispatcher");
 
-export const RestAPI = waitForPropsLazy<t.RestAPI>("getAPIBaseURL", "get");
-export const moment = waitForPropsLazy<typeof import("moment")>("parseTwoDigitYear");
+export const RestAPI = findByProps<t.RestAPI>("getAPIBaseURL", "get");
+export const moment = findByProps<typeof import("moment")>("parseTwoDigitYear");
 
-export const hljs = waitForPropsLazy<typeof import("highlight.js")>("highlight", "registerLanguage");
+export const hljs = findByProps<typeof import("highlight.js")>("highlight", "registerLanguage");
 
-export const lodash = waitForPropsLazy<typeof import("lodash")>("debounce", "cloneDeep");
+export const lodash = findByProps<typeof import("lodash")>("debounce", "cloneDeep");
 
-export const i18n = waitForLazy<t.i18n>(m => m.Messages?.["en-US"]);
+export const i18n = proxyInnerWaitFor<t.i18n>(m => m.Messages?.["en-US"]);
 
-export const SnowflakeUtils = waitForPropsLazy<t.SnowflakeUtils>("fromTimestamp", "extractTimestamp");
+export const SnowflakeUtils = findByProps<t.SnowflakeUtils>("fromTimestamp", "extractTimestamp");
 
-export const Parser = waitForPropsLazy<t.Parser>("parseTopic");
-export const Alerts = waitForPropsLazy<t.Alerts>("show", "close");
+export const Parser = findByProps<t.Parser>("parseTopic");
+export const Alerts = findByProps<t.Alerts>("show", "close");
 
 const ToastType = {
     MESSAGE: 0,
@@ -104,30 +104,30 @@ export function showToast(message: string, type = ToastType.MESSAGE) {
     });
 }
 
-export const UserUtils = waitForPropsLazy("getUser", "fetchCurrentUser") as { getUser: (id: string) => Promise<User>; };
-export const UploadHandler = waitForPropsLazy("showUploadFileSizeExceededError", "promptToUpload") as {
+export const UserUtils = findByProps("getUser", "fetchCurrentUser") as { getUser: (id: string) => Promise<User>; };
+export const UploadHandler = findByProps("showUploadFileSizeExceededError", "promptToUpload") as {
     promptToUpload: (files: File[], channel: Channel, draftType: Number) => void;
 };
 
-export const ApplicationAssetUtils = waitForPropsLazy("fetchAssetIds", "getAssetImage") as {
+export const ApplicationAssetUtils = findByProps("fetchAssetIds", "getAssetImage") as {
     fetchAssetIds: (applicationId: string, e: string[]) => Promise<string[]>;
 };
 
-export const Clipboard = waitForPropsLazy<t.Clipboard>("SUPPORTS_COPY", "copy");
+export const Clipboard = findByProps<t.Clipboard>("SUPPORTS_COPY", "copy");
 
-export const NavigationRouter = waitForPropsLazy<t.NavigationRouter>("transitionTo", "replaceWith", "transitionToGuild");
+export const NavigationRouter = findByProps<t.NavigationRouter>("transitionTo", "replaceWith", "transitionToGuild");
 
-export const SettingsRouter = waitForPropsLazy("open", "saveAccountChanges");
+export const SettingsRouter = findByProps("open", "saveAccountChanges");
 
-export const { Permissions: PermissionsBits } = waitForLazy(m => typeof m.Permissions?.ADMINISTRATOR === "bigint") as { Permissions: t.PermissionsBits; };
+export const { Permissions: PermissionsBits } = proxyInnerWaitFor(m => typeof m.Permissions?.ADMINISTRATOR === "bigint") as { Permissions: t.PermissionsBits; };
 
-export const zustandCreate = waitForCodeLazy<typeof import("zustand").default>("will be removed in v4");
+export const zustandCreate = findByCode<typeof import("zustand").default>("will be removed in v4");
 
 const persistFilter = filters.byCode("[zustand persist middleware]");
-export const { persist: zustandPersist } = waitForLazy<typeof import("zustand/middleware")>(m => m.persist && persistFilter(m.persist));
+export const { persist: zustandPersist } = proxyInnerWaitFor<typeof import("zustand/middleware")>(m => m.persist && persistFilter(m.persist));
 
-export const MessageActions = waitForPropsLazy("editMessage", "sendMessage");
-export const UserProfileActions = waitForPropsLazy("openUserProfileModal", "closeUserProfileModal");
-export const InviteActions = waitForPropsLazy("resolveInvite");
+export const MessageActions = findByProps("editMessage", "sendMessage");
+export const UserProfileActions = findByProps("openUserProfileModal", "closeUserProfileModal");
+export const InviteActions = findByProps("resolveInvite");
 
-export const IconUtils = waitForPropsLazy<t.IconUtils>("getGuildBannerURL", "getUserAvatarURL");
+export const IconUtils = findByProps<t.IconUtils>("getGuildBannerURL", "getUserAvatarURL");

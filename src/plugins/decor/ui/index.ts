@@ -5,10 +5,10 @@
  */
 
 import { classNameFactory } from "@api/Styles";
-import { extractAndLoadChunksLazy, waitForPropsLazy } from "@webpack";
+import { extractAndLoadChunksLazy, findByProps } from "@webpack";
 
 export const cl = classNameFactory("vc-decor-");
-export const DecorationModalStyles = waitForPropsLazy("modalFooterShopButton");
+export const DecorationModalStyles = findByProps("modalFooterShopButton");
 
 export const requireAvatarDecorationModal = extractAndLoadChunksLazy(["openAvatarDecorationModal:"]);
 export const requireCreateStickerModal = extractAndLoadChunksLazy(["stickerInspected]:"]);

@@ -19,9 +19,9 @@
 import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { waitForPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 
-const RelationshipStore = waitForPropsLazy("getRelationships", "isBlocked");
+const RelationshipStore = findByProps("getRelationships", "isBlocked");
 
 export default definePlugin({
     name: "NoBlockedMessages",

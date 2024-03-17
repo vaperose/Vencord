@@ -423,14 +423,10 @@ function runTime(token: string) {
                 }
             }
 
-            for (const [searchType, args] of Vencord.Webpack.lazyWebpackSearchHistory) {
-                let method = searchType;
+            for (const [searchType, args] of [...Vencord.Webpack.webpackSearchHistory]) {
+                let method = searchType as string;
 
-                if (searchType === "findComponent" || searchType === "waitFor" || searchType === "waitForComponent") method = "find";
-                if (searchType === "findExportedComponent" || searchType === "waitForExportedComponent" || searchType === "waitForProps") method = "findByProps";
-                if (searchType === "waitForComponentByCode") method = "findComponentByCode";
-                if (searchType === "waitForCode") method = "findByCode";
-                if (searchType === "waitForStore") method = "findStore";
+                if (searchType === "waitFor") method = "find";
 
                 try {
                     let result: any;
@@ -438,6 +434,7 @@ function runTime(token: string) {
                     if (method === "proxyLazyWebpack" || method === "LazyComponentWebpack") {
                         const [factory] = args;
                         result = factory();
+                        if (result != null && "$$vencordGetter" in result) result = result.$$vencordGetter();
                     } else if (method === "extractAndLoadChunks") {
                         const [code, matcher] = args;
 
@@ -446,14 +443,18 @@ function runTime(token: string) {
                     } else {
                         // @ts-ignore
                         result = Vencord.Webpack[method](...args);
+
+                        // If the result is our Proxy or ComponentWrapper, this means the search failed
+                        if (result != null && result[Vencord.Util.proxyInnerGet] != null) result = undefined;
+                        if (result != null && "$$vencordGetter" in result) result = undefined;
                     }
 
-                    if (result == null || ("$$vencordGetter" in result && result.$$vencordGetter() == null)) throw "a rock at ben shapiro";
+                    if (result == null) throw "a rock at ben shapiro";
                 } catch (e) {
                     let logMessage = searchType;
                     const parsedArgs: any[] = "$$vencordProps" in args[0] ? args[0].$$vencordProps : args;
 
-                    if (!("$$vencordProps" in args[0]) && method === "find" || method === "proxyLazyWebpack" || method === "LazyComponentWebpack") logMessage += `(${parsedArgs[0].toString().slice(0, 147)}...)`;
+                    if (!("$$vencordProps" in args[0]) && method === "find" || method === "proxyInnerWaitFor" || method === "findComponent" || method === "proxyLazyWebpack" || method === "LazyComponentWebpack") logMessage += `(${parsedArgs[0].toString().slice(0, 147)}...)`;
                     else if (method === "extractAndLoadChunks") logMessage += `([${parsedArgs[0].map(arg => `"${arg}"`).join(", ")}], ${parsedArgs[1].toString()})`;
                     else logMessage += `(${parsedArgs.map(arg => `"${arg}"`).join(", ")})`;
 

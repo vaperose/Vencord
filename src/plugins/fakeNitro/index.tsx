@@ -23,21 +23,21 @@ import { ApngBlendOp, ApngDisposeOp, importApngJs } from "@utils/dependencies";
 import { getCurrentGuild } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { proxyLazyWebpack, waitForPropsLazy,waitForStoreLazy } from "@webpack";
+import { findByProps, findStore,proxyLazyWebpack } from "@webpack";
 import { Alerts, ChannelStore, EmojiStore, FluxDispatcher, Forms, lodash, Parser, PermissionsBits, PermissionStore, UploadHandler, UserSettingsActionCreators, UserStore } from "@webpack/common";
 import type { Message } from "discord-types/general";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 import type { ReactElement, ReactNode } from "react";
 
 const DRAFT_TYPE = 0;
-const StickerStore = waitForStoreLazy("StickersStore") as {
+const StickerStore = findStore("StickersStore") as {
     getPremiumPacks(): StickerPack[];
     getAllGuildStickers(): Map<string, Sticker[]>;
     getStickerById(id: string): Sticker | undefined;
 };
 
-const UserSettingsProtoStore = waitForStoreLazy("UserSettingsProtoStore");
-const ProtoUtils = waitForPropsLazy("BINARY_READ_OPTIONS");
+const UserSettingsProtoStore = findStore("UserSettingsProtoStore");
+const ProtoUtils = findByProps("BINARY_READ_OPTIONS");
 
 function searchProtoClassField(localName: string, protoClass: any) {
     const field = protoClass?.fields?.find((field: any) => field.localName === localName);

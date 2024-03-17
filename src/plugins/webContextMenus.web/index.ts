@@ -20,10 +20,10 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { saveFile } from "@utils/web";
-import { waitForPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { Clipboard, ComponentDispatch } from "@webpack/common";
 
-const ctxMenuCallbacks = waitForPropsLazy("contextMenuCallbackNative");
+const ctxMenuCallbacks = findByProps("contextMenuCallbackNative");
 
 async function fetchImage(url: string) {
     const res = await fetch(url);

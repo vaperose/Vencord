@@ -19,11 +19,11 @@
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { waitForPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 
-const { updateGuildNotificationSettings } = waitForPropsLazy("updateGuildNotificationSettings");
-const { toggleShowAllChannels } = waitForPropsLazy("toggleShowAllChannels");
-const { isOptInEnabledForGuild } = waitForPropsLazy("isOptInEnabledForGuild");
+const { updateGuildNotificationSettings } = findByProps("updateGuildNotificationSettings");
+const { toggleShowAllChannels } = findByProps("toggleShowAllChannels");
+const { isOptInEnabledForGuild } = findByProps("isOptInEnabledForGuild");
 
 const settings = definePluginSettings({
     guild: {

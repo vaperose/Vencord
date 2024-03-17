@@ -25,17 +25,17 @@ import { CopyIcon, LinkIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
-import { waitForCodeLazy, waitForComponentByCode, waitForPropsLazy,waitForStoreLazy } from "@webpack";
+import { findByCode, findByProps, findComponentByCode, findStore } from "@webpack";
 import { Text, Tooltip, UserProfileStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { VerifiedIcon } from "./VerifiedIcon";
 
-const Section = waitForComponentByCode(".lastSection", "children:");
-const ThemeStore = waitForStoreLazy("ThemeStore");
-const platformHooks: { useLegacyPlatformType(platform: string): string; } = waitForPropsLazy("useLegacyPlatformType");
-const platforms: { get(type: string): ConnectionPlatform; } = waitForPropsLazy("isSupported", "getByUrl");
-const getTheme: (user: User, displayProfile: any) => any = waitForCodeLazy(',"--profile-gradient-primary-color"');
+const Section = findComponentByCode(".lastSection", "children:");
+const ThemeStore = findStore("ThemeStore");
+const platformHooks: { useLegacyPlatformType(platform: string): string; } = findByProps("useLegacyPlatformType");
+const platforms: { get(type: string): ConnectionPlatform; } = findByProps("isSupported", "getByUrl");
+const getTheme: (user: User, displayProfile: any) => any = findByCode(',"--profile-gradient-primary-color"');
 
 const enum Spacing {
     COMPACT,

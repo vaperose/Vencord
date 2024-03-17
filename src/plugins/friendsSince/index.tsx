@@ -7,15 +7,15 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { waitForPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { React, RelationshipStore } from "@webpack/common";
 
-const { Heading, Text } = waitForPropsLazy("Heading", "Text");
-const container = waitForPropsLazy("memberSinceContainer");
-const { getCreatedAtDate } = waitForPropsLazy("getCreatedAtDate");
-const clydeMoreInfo = waitForPropsLazy("clydeMoreInfo");
-const locale = waitForPropsLazy("getLocale");
-const lastSection = waitForPropsLazy("lastSection");
+const { Heading, Text } = findByProps("Heading", "Text");
+const container = findByProps("memberSinceContainer");
+const { getCreatedAtDate } = findByProps("getCreatedAtDate");
+const clydeMoreInfo = findByProps("clydeMoreInfo");
+const locale = findByProps("getLocale");
+const lastSection = findByProps("lastSection");
 
 export default definePlugin({
     name: "FriendsSince",

@@ -18,7 +18,7 @@
 
 import { openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
-import { waitForPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { Alerts, Parser, Timestamp, useState } from "@webpack/common";
 
 import { Auth, getToken } from "../auth";
@@ -30,11 +30,11 @@ import { openBlockModal } from "./BlockedUserModal";
 import { BlockButton, DeleteButton, ReportButton } from "./MessageButton";
 import ReviewBadge from "./ReviewBadge";
 
-const MessageClasses = waitForPropsLazy("cozyMessage");
-const ContainerClasses = waitForPropsLazy("container", "isHeader");
-const AvatarClasses = waitForPropsLazy("avatar", "zalgo");
-const ButtonClasses = waitForPropsLazy("button", "wrapper", "selected");
-const BotTagClasses = waitForPropsLazy("botTag", "botTagRegular");
+const MessageClasses = findByProps("cozyMessage");
+const ContainerClasses = findByProps("container", "isHeader");
+const AvatarClasses = findByProps("avatar", "zalgo");
+const ButtonClasses = findByProps("button", "wrapper", "selected");
+const BotTagClasses = findByProps("botTag", "botTagRegular");
 
 const dateFormat = new Intl.DateTimeFormat();
 

@@ -18,7 +18,7 @@
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
-import { waitForPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { Forms, React } from "@webpack/common";
 
 interface AppStartPerformance {
@@ -45,7 +45,7 @@ interface Log {
     delta?: number;
 }
 
-const AppStartPerformance = waitForPropsLazy("markWithDelta", "markAndLog", "markAt") as AppStartPerformance;
+const AppStartPerformance = findByProps("markWithDelta", "markAndLog", "markAt") as AppStartPerformance;
 
 interface TimerItemProps extends Log {
     instance: {

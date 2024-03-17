@@ -21,12 +21,12 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { waitForCodeLazy, waitForPropsLazy } from "@webpack";
+import { findByCode, findByProps } from "@webpack";
 
 type AnonUpload = Upload & { anonymise?: boolean; };
 
-const ActionBarIcon = waitForCodeLazy(".actionBarIcon)");
-const UploadDraft = waitForPropsLazy("popFirstFile", "update");
+const ActionBarIcon = findByCode(".actionBarIcon)");
+const UploadDraft = findByProps("popFirstFile", "update");
 
 const enum Methods {
     Random,

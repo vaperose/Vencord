@@ -4,10 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { waitForPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { Parser } from "@webpack/common";
 
-const CodeContainerClasses = waitForPropsLazy("markup", "codeContainer");
+const CodeContainerClasses = findByProps("markup", "codeContainer");
 
 /**
  * Renders code in a Discord codeblock

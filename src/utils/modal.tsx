@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { filters, waitForExportedComponent, waitForLazy, waitForPropsLazy } from "@webpack";
+import { filters, findByProps, findExportedComponent, proxyInnerWaitFor } from "@webpack";
 import type { ComponentType, PropsWithChildren, ReactNode, Ref } from "react";
 
 
@@ -107,12 +107,12 @@ export let ModalContent: Modals["ModalContent"];
 export let ModalFooter: Modals["ModalFooter"];
 export let ModalCloseButton: Modals["ModalCloseButton"];
 
-export const Modals = waitForLazy<Modals>(filters.byProps("ModalRoot", "ModalCloseButton"), m => {
+export const Modals = proxyInnerWaitFor<Modals>(filters.byProps("ModalRoot", "ModalCloseButton"), m => {
     ({ ModalRoot, ModalHeader, ModalContent, ModalFooter, ModalCloseButton } = m);
     return m;
 });
 
-export type ImageModal = ComponentType<{
+export type ImageModalProps = {
     className?: string;
     src: string;
     placeholder: string;
@@ -127,11 +127,11 @@ export type ImageModal = ComponentType<{
     shouldAnimate?: boolean;
     onClose?(): void;
     shouldHideMediaOptions?: boolean;
-}>;
+};
 
-export const ImageModal = waitForExportedComponent<ImageModal>("ImageModal");
+export const ImageModal = findExportedComponent<ImageModalProps>("ImageModal");
 
-const ModalAPI = waitForPropsLazy("openModalLazy");
+const ModalAPI = findByProps("openModalLazy");
 
 /**
  * Wait for the render promise to resolve, then open a modal with it.

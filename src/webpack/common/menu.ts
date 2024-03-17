@@ -17,10 +17,10 @@
 */
 
 // eslint-disable-next-line path-alias/no-relative
-import { waitForPropsLazy } from "../webpack";
+import { findByProps } from "../webpack";
 import type * as t from "./types/menu";
 
-export const Menu = waitForPropsLazy<t.Menu>("MenuItem", "MenuSliderControl");
+export const Menu = findByProps<t.Menu>("MenuItem", "MenuSliderControl");
 
-export const ContextMenuApi = waitForPropsLazy<t.ContextMenuApi>("closeContextMenu", "openContextMenu");
+export const ContextMenuApi = findByProps<t.ContextMenuApi>("closeContextMenu", "openContextMenu");
 

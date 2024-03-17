@@ -20,7 +20,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import ExpandableHeader from "@components/ExpandableHeader";
 import { proxyLazy } from "@utils/lazy";
 import { classes } from "@utils/misc";
-import { waitForPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { i18n, PermissionsBits, Text, Tooltip, useMemo, UserStore } from "@webpack/common";
 import type { Guild, GuildMember } from "discord-types/general";
 
@@ -36,9 +36,9 @@ interface UserPermission {
 
 type UserPermissions = Array<UserPermission>;
 
-const RoleClasses1 = waitForPropsLazy("roles", "rolePill", "rolePillBorder");
-const RoleClasses2 = waitForPropsLazy("roleCircle", "dotBorderBase", "dotBorderColor");
-const RoleClasses3 = waitForPropsLazy("roleNameOverflow", "root", "roleName", "roleRemoveButton");
+const RoleClasses1 = findByProps("roles", "rolePill", "rolePillBorder");
+const RoleClasses2 = findByProps("roleCircle", "dotBorderBase", "dotBorderColor");
+const RoleClasses3 = findByProps("roleNameOverflow", "root", "roleName", "roleRemoveButton");
 
 const Classes = proxyLazy(() => Object.assign({}, RoleClasses1, RoleClasses2, RoleClasses3));
 

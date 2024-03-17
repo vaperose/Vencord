@@ -8,12 +8,12 @@ import "./ChatButton.css";
 
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
-import { waitForPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { Button, ButtonLooks, ButtonWrapperClasses, Tooltip } from "@webpack/common";
 import { Channel } from "discord-types/general";
 import { HTMLProps, MouseEventHandler, ReactNode } from "react";
 
-const ChannelTextAreaClasses = waitForPropsLazy<Record<"button" | "buttonContainer", string>>("buttonContainer", "channelTextArea");
+const ChannelTextAreaClasses = findByProps<Record<"button" | "buttonContainer", string>>("buttonContainer", "channelTextArea");
 
 export interface ChatBarProps {
     channel: Channel;

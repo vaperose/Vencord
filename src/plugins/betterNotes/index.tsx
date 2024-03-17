@@ -19,9 +19,9 @@
 import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { waitForPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 
-const UserPopoutSectionCssClasses = waitForPropsLazy("section", "lastSection");
+const UserPopoutSectionCssClasses = findByProps("section", "lastSection");
 
 export default definePlugin({
     name: "BetterNotesBox",

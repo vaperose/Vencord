@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { waitForLazy, waitForPropsLazy } from "@webpack";
+import { findByProps, proxyInnerWaitFor } from "@webpack";
 
 import * as t from "./types/classes";
 
-export const ModalImageClasses: t.ImageModalClasses = waitForLazy(m => m.image && m.modal && !m.applicationIcon);
-export const ButtonWrapperClasses: t.ButtonWrapperClasses = waitForPropsLazy("buttonWrapper", "buttonContent");
+export const ModalImageClasses: t.ImageModalClasses = proxyInnerWaitFor(m => m.image && m.modal && !m.applicationIcon);
+export const ButtonWrapperClasses: t.ButtonWrapperClasses = findByProps("buttonWrapper", "buttonContent");

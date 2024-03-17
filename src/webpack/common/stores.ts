@@ -19,10 +19,10 @@
 import type * as Stores from "discord-types/stores";
 
 // eslint-disable-next-line path-alias/no-relative
-import { waitForPropsLazy, waitForStoreLazy } from "../webpack";
+import { findByProps, findStore } from "../webpack";
 import * as t from "./types/stores";
 
-export const Flux: t.Flux = waitForPropsLazy("connectStores");
+export const Flux: t.Flux = findByProps("connectStores");
 
 export type GenericStore = t.FluxStore & Record<string, any>;
 
@@ -33,32 +33,32 @@ export enum DraftType {
     ApplicationLauncherCommand = 3
 }
 
-export const MessageStore = waitForStoreLazy("MessageStore") as Omit<Stores.MessageStore, "getMessages"> & {
+export const MessageStore = findStore("MessageStore") as Omit<Stores.MessageStore, "getMessages"> & {
     getMessages(chanId: string): any;
 };
 
 // this is not actually a FluxStore
-export const PrivateChannelsStore = waitForPropsLazy("openPrivateChannel");
-export const PermissionStore: GenericStore = waitForStoreLazy("PermissionStore");
-export const GuildChannelStore: GenericStore = waitForStoreLazy("GuildChannelStore");
-export const ReadStateStore: GenericStore = waitForStoreLazy("ReadStateStore");
-export const PresenceStore: GenericStore = waitForStoreLazy("PresenceStore");
+export const PrivateChannelsStore = findByProps("openPrivateChannel");
+export const PermissionStore: GenericStore = findStore("PermissionStore");
+export const GuildChannelStore: GenericStore = findStore("GuildChannelStore");
+export const ReadStateStore: GenericStore = findStore("ReadStateStore");
+export const PresenceStore: GenericStore = findStore("PresenceStore");
 
-export const GuildStore: t.GuildStore = waitForStoreLazy("GuildStore");
-export const UserStore: Stores.UserStore & t.FluxStore = waitForStoreLazy("UserStore");
-export const UserProfileStore: GenericStore = waitForStoreLazy("UserProfileStore");
-export const SelectedChannelStore: Stores.SelectedChannelStore & t.FluxStore = waitForStoreLazy("SelectedChannelStore");
-export const SelectedGuildStore: t.FluxStore & Record<string, any> = waitForStoreLazy("SelectedGuildStore");
-export const ChannelStore: Stores.ChannelStore & t.FluxStore = waitForStoreLazy("ChannelStore");
-export const GuildMemberStore: Stores.GuildMemberStore & t.FluxStore = waitForStoreLazy("GuildMemberStore");
-export const RelationshipStore = waitForStoreLazy("RelationshipStore") as Stores.RelationshipStore & t.FluxStore & {
+export const GuildStore: t.GuildStore = findStore("GuildStore");
+export const UserStore: Stores.UserStore & t.FluxStore = findStore("UserStore");
+export const UserProfileStore: GenericStore = findStore("UserProfileStore");
+export const SelectedChannelStore: Stores.SelectedChannelStore & t.FluxStore = findStore("SelectedChannelStore");
+export const SelectedGuildStore: t.FluxStore & Record<string, any> = findStore("SelectedGuildStore");
+export const ChannelStore: Stores.ChannelStore & t.FluxStore = findStore("ChannelStore");
+export const GuildMemberStore: Stores.GuildMemberStore & t.FluxStore = findStore("GuildMemberStore");
+export const RelationshipStore = findStore("RelationshipStore") as Stores.RelationshipStore & t.FluxStore & {
     /** Get the date (as a string) that the relationship was created */
     getSince(userId: string): string;
 };
 
-export const EmojiStore: t.EmojiStore = waitForStoreLazy("EmojiStore");
-export const WindowStore: t.WindowStore = waitForStoreLazy("WindowStore");
-export const DraftStore: t.DraftStore = waitForStoreLazy("DraftStore");
+export const EmojiStore: t.EmojiStore = findStore("EmojiStore");
+export const WindowStore: t.WindowStore = findStore("WindowStore");
+export const DraftStore: t.DraftStore = findStore("DraftStore");
 
 /**
  * React hook that returns stateful data for one or more stores
@@ -79,4 +79,4 @@ export const { useStateFromStores }: {
         isEqual?: (old: T, newer: T) => boolean
     ) => T;
 }
-    = waitForPropsLazy("useStateFromStores");
+    = findByProps("useStateFromStores");

@@ -17,7 +17,7 @@
 */
 
 // eslint-disable-next-line path-alias/no-relative
-import { filters, waitFor, waitForComponent, waitForExportedComponent } from "@webpack";
+import { filters, findComponent, findExportedComponent, waitFor } from "@webpack";
 
 import * as t from "./types/components";
 
@@ -55,8 +55,8 @@ waitFor(filters.byProps("FormItem", "Button"), m => {
     ({ useToken, Card, Button, FormSwitch: Switch, Tooltip, TextInput, TextArea, Text, Select, SearchableSelect, Slider, ButtonLooks, TabBar, Popout, Dialog, Paginator, ScrollerThin, Clickable, Avatar } = m);
 });
 
-export const MaskedLink = waitForComponent<t.MaskedLink>(filters.componentByCode("MASKED_LINK)"));
-export const Timestamp = waitForComponent<t.Timestamp>(filters.componentByCode(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));
-export const Flex = waitForComponent<t.Flex>(filters.byProps("Justify", "Align", "Wrap"));
+export const MaskedLink = findComponent<t.MaskedLinkProps>(filters.componentByCode("MASKED_LINK)"));
+export const Timestamp = findComponent<t.TimestampProps>(filters.componentByCode(".Messages.MESSAGE_EDITED_TIMESTAMP_A11Y_LABEL.format"));
+export const Flex = findComponent<t.FlexProps>(filters.byProps("Justify", "Align", "Wrap"));
 
-export const OAuth2AuthorizeModal = waitForExportedComponent("OAuth2AuthorizeModal");
+export const OAuth2AuthorizeModal = findExportedComponent("OAuth2AuthorizeModal");

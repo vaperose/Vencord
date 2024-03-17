@@ -17,14 +17,14 @@
 */
 
 import { mergeDefaults } from "@utils/misc";
-import { waitForPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { MessageActions, SnowflakeUtils } from "@webpack/common";
 import { Message } from "discord-types/general";
 import type { PartialDeep } from "type-fest";
 
 import { Argument } from "./types";
 
-const MessageCreator = waitForPropsLazy("createBotMessage");
+const MessageCreator = findByProps("createBotMessage");
 
 export function generateId() {
     return `-${SnowflakeUtils.fromTimestamp(Date.now())}`;

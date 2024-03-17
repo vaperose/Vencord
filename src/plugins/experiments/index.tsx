@@ -22,10 +22,10 @@ import { ErrorCard } from "@components/ErrorCard";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
-import { waitForPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { Forms, React } from "@webpack/common";
 
-const KbdStyles = waitForPropsLazy("key", "removeBuildOverride");
+const KbdStyles = findByProps("key", "removeBuildOverride");
 
 const settings = definePluginSettings({
     enableIsStaff: {

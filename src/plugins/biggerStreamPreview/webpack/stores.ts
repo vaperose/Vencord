@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { waitForStoreLazy } from "@webpack";
+import { findStore } from "@webpack";
 
 import * as t from "./types/stores";
 
-export const ApplicationStreamPreviewStore: t.ApplicationStreamPreviewStore = waitForStoreLazy("ApplicationStreamPreviewStore");
-export const ApplicationStreamingStore: t.ApplicationStreamingStore = waitForStoreLazy("ApplicationStreamingStore");
+export const ApplicationStreamPreviewStore: t.ApplicationStreamPreviewStore = findStore("ApplicationStreamPreviewStore");
+export const ApplicationStreamingStore: t.ApplicationStreamingStore = findStore("ApplicationStreamingStore");

@@ -21,7 +21,7 @@ import { Link } from "@components/Link";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
-import { waitForPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { ApplicationAssetUtils, FluxDispatcher, Forms } from "@webpack/common";
 
 interface ActivityAssets {
@@ -85,7 +85,7 @@ const placeholderId = "2a96cbd8b46e442fc41c2b86b821562f";
 
 const logger = new Logger("LastFMRichPresence");
 
-const presenceStore = waitForPropsLazy("getLocalPresence");
+const presenceStore = findByProps("getLocalPresence");
 
 async function getApplicationAsset(key: string): Promise<string> {
     return (await ApplicationAssetUtils.fetchAssetIds(applicationId, [key]))[0];

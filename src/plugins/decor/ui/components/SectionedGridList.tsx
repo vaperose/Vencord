@@ -5,13 +5,13 @@
  */
 
 import { classes } from "@utils/misc";
-import { waitForPropsLazy } from "@webpack";
+import { findByProps } from "@webpack";
 import { React } from "@webpack/common";
 
 import { cl } from "../";
 import Grid, { GridProps } from "./Grid";
 
-const ScrollerClasses = waitForPropsLazy("managedReactiveScroller");
+const ScrollerClasses = findByProps("managedReactiveScroller");
 
 type Section<SectionT, ItemT> = SectionT & {
     items: Array<ItemT>;
