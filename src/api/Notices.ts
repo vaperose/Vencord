@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { proxyInnerWaitFor } from "@webpack";
+import { find } from "@webpack";
 
-const NoticesModule = proxyInnerWaitFor(m => m.show && m.dismiss && !m.suppressAll, m => m);
+const NoticesModule = find(m => m.show && m.dismiss && !m.suppressAll, m => m);
 
 export const noticesQueue = [] as any[];
 export let currentNotice: any = null;

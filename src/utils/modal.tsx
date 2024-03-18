@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { filters, findByProps, findExportedComponent, proxyInnerWaitFor } from "@webpack";
+import { filters, find, findByProps, findExportedComponent } from "@webpack";
 import type { ComponentType, PropsWithChildren, ReactNode, Ref } from "react";
 
 
@@ -107,7 +107,7 @@ export let ModalContent: Modals["ModalContent"];
 export let ModalFooter: Modals["ModalFooter"];
 export let ModalCloseButton: Modals["ModalCloseButton"];
 
-export const Modals = proxyInnerWaitFor<Modals>(filters.byProps("ModalRoot", "ModalCloseButton"), m => {
+export const Modals = find<Modals>(filters.byProps("ModalRoot", "ModalCloseButton"), m => {
     ({ ModalRoot, ModalHeader, ModalContent, ModalFooter, ModalCloseButton } = m);
     return m;
 });

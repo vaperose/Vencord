@@ -19,10 +19,10 @@
 import type { Channel, User } from "discord-types/general";
 
 // eslint-disable-next-line path-alias/no-relative
-import { _resolveReady, filters, findByCode, findByProps, proxyInnerWaitFor,waitFor } from "../webpack";
+import { _resolveReady, filters, find, findByCode, findByProps, waitFor } from "../webpack";
 import type * as t from "./types/utils";
 
-export const FluxDispatcher = proxyInnerWaitFor<t.FluxDispatcher>(filters.byProps("dispatch", "subscribe"), m => {
+export const FluxDispatcher = find<t.FluxDispatcher>(filters.byProps("dispatch", "subscribe"), m => {
     const cb = () => {
         m.unsubscribe("CONNECTION_OPEN", cb);
         _resolveReady();
@@ -41,7 +41,7 @@ export const hljs = findByProps<typeof import("highlight.js")>("highlight", "reg
 
 export const lodash = findByProps<typeof import("lodash")>("debounce", "cloneDeep");
 
-export const i18n = proxyInnerWaitFor<t.i18n>(m => m.Messages?.["en-US"]);
+export const i18n = find<t.i18n>(m => m.Messages?.["en-US"]);
 
 export const SnowflakeUtils = findByProps<t.SnowflakeUtils>("fromTimestamp", "extractTimestamp");
 
@@ -119,12 +119,12 @@ export const NavigationRouter = findByProps<t.NavigationRouter>("transitionTo", 
 
 export const SettingsRouter = findByProps("open", "saveAccountChanges");
 
-export const { Permissions: PermissionsBits } = proxyInnerWaitFor(m => typeof m.Permissions?.ADMINISTRATOR === "bigint") as { Permissions: t.PermissionsBits; };
+export const { Permissions: PermissionsBits } = find(m => typeof m.Permissions?.ADMINISTRATOR === "bigint") as { Permissions: t.PermissionsBits; };
 
 export const zustandCreate = findByCode<typeof import("zustand").default>("will be removed in v4");
 
 const persistFilter = filters.byCode("[zustand persist middleware]");
-export const { persist: zustandPersist } = proxyInnerWaitFor<typeof import("zustand/middleware")>(m => m.persist && persistFilter(m.persist));
+export const { persist: zustandPersist } = find<typeof import("zustand/middleware")>(m => m.persist && persistFilter(m.persist));
 
 export const MessageActions = findByProps("editMessage", "sendMessage");
 export const UserProfileActions = findByProps("openUserProfileModal", "closeUserProfileModal");

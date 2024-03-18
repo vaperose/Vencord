@@ -21,7 +21,7 @@ import { Flex } from "@components/Flex";
 import { Devs } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import definePlugin, { OptionType } from "@utils/types";
-import { findByProps, proxyInnerWaitFor } from "@webpack";
+import { find, findByProps } from "@webpack";
 import { Card, ChannelStore, Forms, GuildStore, PermissionsBits, Switch, TextInput, Tooltip, useState } from "@webpack/common";
 import { RC } from "@webpack/types";
 import { Channel, Message, User } from "discord-types/general";
@@ -58,7 +58,7 @@ const PermissionUtil = findByProps("computePermissions", "canEveryoneRole") as {
     computePermissions({ ...args }): bigint;
 };
 
-const Tag = proxyInnerWaitFor(m => m.Types?.[0] === "BOT") as RC<{ type?: number, className?: string, useRemSizes?: boolean; }> & { Types: Record<string, number>; };
+const Tag = find(m => m.Types?.[0] === "BOT") as RC<{ type?: number, className?: string, useRemSizes?: boolean; }> & { Types: Record<string, number>; };
 
 const isWebhook = (message: Message, user: User) => !!message?.webhookId && user.isNonUserBot();
 

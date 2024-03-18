@@ -426,7 +426,7 @@ function runTime(token: string) {
             for (const [searchType, args] of [...Vencord.Webpack.webpackSearchHistory]) {
                 let method = searchType as string;
 
-                if (searchType === "waitFor") method = "find";
+                if (searchType === "waitFor") method = "cacheFind";
 
                 try {
                     let result: any;
@@ -454,8 +454,8 @@ function runTime(token: string) {
                     let logMessage = searchType;
                     const parsedArgs: any[] = "$$vencordProps" in args[0] ? args[0].$$vencordProps : args;
 
-                    if (!("$$vencordProps" in args[0]) && method === "find" || method === "proxyInnerWaitFor" || method === "findComponent" || method === "proxyLazyWebpack" || method === "LazyComponentWebpack") logMessage += `(${parsedArgs[0].toString().slice(0, 147)}...)`;
-                    else if (method === "extractAndLoadChunks") logMessage += `([${parsedArgs[0].map(arg => `"${arg}"`).join(", ")}], ${parsedArgs[1].toString()})`;
+                    if (!("$$vencordProps" in args[0]) && searchType === "waitFor" || searchType === "find" || searchType === "findComponent" || searchType === "proxyLazyWebpack" || searchType === "LazyComponentWebpack") logMessage += `(${parsedArgs[0].toString().slice(0, 147)}...)`;
+                    else if (searchType === "extractAndLoadChunks") logMessage += `([${parsedArgs[0].map(arg => `"${arg}"`).join(", ")}], ${parsedArgs[1].toString()})`;
                     else logMessage += `(${parsedArgs.map(arg => `"${arg}"`).join(", ")})`;
 
                     console.log("[PUP_WEBPACK_FIND_FAIL]", logMessage);

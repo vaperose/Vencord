@@ -29,7 +29,7 @@ import { classes } from "@utils/misc";
 import { openModal } from "@utils/modal";
 import { showItemInFolder } from "@utils/native";
 import { useAwaiter } from "@utils/react";
-import { findComponent, proxyInnerWaitFor } from "@webpack";
+import { find, findComponent } from "@webpack";
 import { Button, Card, Forms, React, showToast, TabBar, TextArea, useEffect, useRef, useState } from "@webpack/common";
 import type { Ref, SyntheticEvent } from "react";
 
@@ -44,7 +44,7 @@ type FileInputProps = {
 };
 
 const FileInput = findComponent<FileInputProps>(m => m.prototype?.activateUploadDialogue && m.prototype.setRef);
-const TextAreaProps = proxyInnerWaitFor(m => typeof m.textarea === "string");
+const TextAreaProps = find(m => typeof m.textarea === "string");
 
 const cl = classNameFactory("vc-settings-theme-");
 

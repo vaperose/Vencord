@@ -113,7 +113,7 @@ if (IS_DEV && IS_DISCORD_DESKTOP) {
     }, 0);
 }
 
-export const webpackSearchHistory = [] as Array<["waitFor" | "proxyInnerWaitFor" | "findComponent" | "findExportedComponent" | "findComponentByCode" | "findByProps" | "findByCode" | "findStore" | "extractAndLoadChunks" | "proxyLazyWebpack" | "LazyComponentWebpack", any[]]>;
+export const webpackSearchHistory = [] as Array<["waitFor" | "find" | "findComponent" | "findExportedComponent" | "findComponentByCode" | "findByProps" | "findByCode" | "findStore" | "extractAndLoadChunks" | "proxyLazyWebpack" | "LazyComponentWebpack", any[]]>;
 
 function handleModuleNotFound(method: string, ...filter: unknown[]) {
     const err = new Error(`webpack.${method} found no module`);
@@ -129,7 +129,7 @@ function handleModuleNotFound(method: string, ...filter: unknown[]) {
  * @param filter A function that takes a module and returns a boolean
  * @returns The found module or null
  */
-export const find = traceFunction("find", function find(filter: FilterFn, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
+export const cacheFind = traceFunction("find", function find(filter: FilterFn, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
@@ -170,7 +170,7 @@ export function waitFor(filter: FilterFn, callback: ModCallbackFn, { isIndirect 
     if (IS_DEV && !isIndirect) webpackSearchHistory.push(["waitFor", [filter]]);
 
     if (cache != null) {
-        const existing = find(filter, { isIndirect: true });
+        const existing = cacheFind(filter, { isIndirect: true });
         if (existing) return callback(existing);
     }
 
@@ -178,6 +178,9 @@ export function waitFor(filter: FilterFn, callback: ModCallbackFn, { isIndirect 
 }
 
 /**
+ * Find the first module that matches the filter.
+ *
+ * The way this works internally is:
  * Wait for the first module that matches the provided filter to be required,
  * then call the callback with the module as the first argument.
  *
@@ -190,13 +193,13 @@ export function waitFor(filter: FilterFn, callback: ModCallbackFn, { isIndirect 
  * @param callback A function that takes the found module as its first argument and returns to use as the proxy inner value
  * @returns A proxy that has the callback return value as its true value, or the callback return value if the callback was called when the function was called
  */
-export function proxyInnerWaitFor<T = any>(filter: FilterFn, callback: (mod: any) => any = m => m, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
+export function find<T = any>(filter: FilterFn, callback: (mod: any) => any = m => m, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
     if (typeof callback !== "function")
         throw new Error("Invalid callback. Expected a function got " + typeof callback);
 
-    if (IS_DEV && !isIndirect) webpackSearchHistory.push(["proxyInnerWaitFor", [filter]]);
+    if (IS_DEV && !isIndirect) webpackSearchHistory.push(["find", [filter]]);
 
     const [proxy, setInnerValue] = proxyInner<T>();
     waitFor(filter, mod => setInnerValue(callback(mod)), { isIndirect: true });
@@ -301,7 +304,7 @@ export function findComponentByCode<T extends object = any>(...code: string[] | 
 export function findByProps<T = any>(...props: string[]) {
     if (IS_DEV) webpackSearchHistory.push(["findByProps", props]);
 
-    return proxyInnerWaitFor<T>(filters.byProps(...props), m => m, { isIndirect: true });
+    return find<T>(filters.byProps(...props), m => m, { isIndirect: true });
 }
 
 /**
@@ -312,7 +315,7 @@ export function findByProps<T = any>(...props: string[]) {
 export function findByCode<T = any>(...code: string[]) {
     if (IS_DEV) webpackSearchHistory.push(["findByCode", code]);
 
-    return proxyInnerWaitFor<T>(filters.byCode(...code), m => m, { isIndirect: true });
+    return find<T>(filters.byCode(...code), m => m, { isIndirect: true });
 }
 
 /**
@@ -323,7 +326,7 @@ export function findByCode<T = any>(...code: string[]) {
 export function findStore<T = any>(name: string) {
     if (IS_DEV) webpackSearchHistory.push(["findStore", [name]]);
 
-    return proxyInnerWaitFor<T>(filters.byStoreName(name), m => m, { isIndirect: true });
+    return find<T>(filters.byStoreName(name), m => m, { isIndirect: true });
 }
 
 export function findAll(filter: FilterFn) {
@@ -346,7 +349,7 @@ export function findAll(filter: FilterFn) {
 }
 
 /**
- * Same as {@link find} but in bulk
+ * Same as {@link cacheFind} but in bulk
  * @param filterFns Array of filters. Please note that this array will be modified in place, so if you still
  *                need it afterwards, pass a copy.
  * @returns Array of results in the same order as the passed filters
@@ -364,7 +367,7 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
         if (IS_DEV) {
             throw new Error("bulk called with only one filter. Use find");
         }
-        return find(filterFns[0]);
+        return cacheFind(filterFns[0]);
     }
 
     let found = 0;
