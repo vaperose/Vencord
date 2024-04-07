@@ -35,3 +35,4 @@ export default definePlugin({
 
     StartupTimingPage
 });
+gi;

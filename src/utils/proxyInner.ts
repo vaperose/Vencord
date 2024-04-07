@@ -83,8 +83,7 @@ export function proxyInner<T = any>(isChild = false): [proxy: T, setInnerValue: 
                 return Reflect.get(innerTarget, p, receiver);
             }
 
-            const val = innerTarget[p];
-            return typeof val === "function" ? val.bind(innerTarget) : val;
+            throw new Error("proxyInner called on a primitive value");
 
         }
     }) as T, setInnerValue];
