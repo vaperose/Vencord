@@ -7,7 +7,7 @@
 export const proxyInnerGet = Symbol.for("vencord.proxyInner.get");
 export const proxyInnerValue = Symbol.for("vencord.proxyInner.innerValue");
 
-// Proxies demand that these properties be unmodified, so proxyLazy
+// Proxies demand that these properties be unmodified, so proxyInner
 // will always return the function default for them.
 const unconfigurable = ["arguments", "caller", "prototype"];
 
@@ -34,7 +34,7 @@ const handler: ProxyHandler<any> = {
 
 /**
  * A proxy which has an inner value that can be set later.
- * When a property is accessed, the proxy looks for the value in the its inner value, and errors if it's not set.
+ * When a property is accessed, the proxy looks for the property value in its inner value, and errors if it's not set.
  * @returns A proxy which will act like the inner value when accessed
  */
 export function proxyInner<T = any>(isChild = false): [proxy: T, setInnerValue: (innerValue: T) => void] {
@@ -42,7 +42,7 @@ export function proxyInner<T = any>(isChild = false): [proxy: T, setInnerValue: 
     if (!isChild) setTimeout(() => isSameTick = false, 0);
 
     const proxyDummy = Object.assign(function () { }, {
-        [proxyInnerGet]: () => {
+        [proxyInnerGet]: function () {
             if (proxyDummy[proxyInnerValue] == null) {
                 throw new Error("Proxy inner value is undefined, setInnerValue was never called.");
             }
@@ -65,10 +65,10 @@ export function proxyInner<T = any>(isChild = false): [proxy: T, setInnerValue: 
             if (p === proxyInnerValue) return target[proxyInnerValue];
             if (p === proxyInnerGet) return target[proxyInnerGet];
 
-            // if we're still in the same tick, it means the lazy was immediately used.
-            // thus, we lazy proxy the get access to make things like destructuring work as expected
-            // meow here will also be a lazy
-            // `const { meow } = findByPropsLazy("meow");`
+            // if we're still in the same tick, it means the proxy was immediately used.
+            // thus, we proxy the get access to make things like destructuring work as expected
+            // meow here will also be a proxy
+            // `const { meow } = findByProps("meow");`
             if (!isChild && isSameTick) {
                 const [recursiveProxy, recursiveSetInnerValue] = proxyInner(true);
                 recursiveSetInnerValues.push((innerValue: T) => {
@@ -78,7 +78,14 @@ export function proxyInner<T = any>(isChild = false): [proxy: T, setInnerValue: 
                 return recursiveProxy;
             }
 
-            return handler.get?.(target, p, receiver);
+            const innerTarget = target[proxyInnerGet]();
+            if (typeof innerTarget === "object" || typeof innerTarget === "function") {
+                return handler.get?.(target, p, receiver);
+            }
+
+            const val = innerTarget[p];
+            return typeof val === "function" ? val.bind(innerTarget) : val;
+
         }
     }) as T, setInnerValue];
 }
