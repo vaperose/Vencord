@@ -80,7 +80,7 @@ export function proxyInner<T = any>(isChild = false): [proxy: T, setInnerValue: 
 
             const innerTarget = target[proxyInnerGet]();
             if (typeof innerTarget === "object" || typeof innerTarget === "function") {
-                return Reflect.get(target, p, receiver);
+                return Reflect.get(innerTarget, p, receiver);
             }
 
             const val = innerTarget[p];
