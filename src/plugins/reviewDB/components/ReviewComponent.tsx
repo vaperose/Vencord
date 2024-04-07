@@ -30,11 +30,11 @@ import { openBlockModal } from "./BlockedUserModal";
 import { BlockButton, DeleteButton, ReportButton } from "./MessageButton";
 import ReviewBadge from "./ReviewBadge";
 
-const MessageClasses = findByProps("cozyMessage");
-const ContainerClasses = findByProps("container", "isHeader");
-const AvatarClasses = findByProps("avatar", "zalgo");
-const ButtonClasses = findByProps("button", "wrapper", "selected");
-const BotTagClasses = findByProps("botTag", "botTagRegular");
+const { cozyMessage, message, groupStart, buttons, buttonsInner } = findByProps("cozyMessage");
+const { container, isHeader } = findByProps("container", "isHeader");
+const { wrapper, cozy, avatar, clickable, username } = findByProps("avatar", "zalgo");
+const buttonClasses = findByProps("button", "wrapper", "selected");
+const botTag = findByProps("botTag", "botTagRegular");
 
 const dateFormat = new Intl.DateTimeFormat();
 
@@ -105,7 +105,7 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
     }
 
     return (
-        <div className={classes(cl("review"), MessageClasses.cozyMessage, AvatarClasses.wrapper, MessageClasses.message, MessageClasses.groupStart, AvatarClasses.cozy)} style={
+        <div className={classes(cl("review"), cozyMessage, wrapper, message, groupStart, cozy)} style={
             {
                 marginLeft: "0px",
                 paddingLeft: "52px", // wth is this
@@ -114,14 +114,14 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
         }>
 
             <img
-                className={classes(AvatarClasses.avatar, AvatarClasses.clickable)}
+                className={classes(avatar, clickable)}
                 onClick={openModal}
                 src={review.sender.profilePhoto || "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128"}
                 style={{ left: "0px", zIndex: 0 }}
             />
             <div style={{ display: "inline-flex", justifyContent: "center", alignItems: "center" }}>
                 <span
-                    className={classes(AvatarClasses.clickable, AvatarClasses.username)}
+                    className={classes(clickable, username)}
                     style={{ color: "var(--channels-default)", fontSize: "14px" }}
                     onClick={() => openModal()}
                 >
@@ -130,9 +130,9 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
 
                 {review.type === ReviewType.System && (
                     <span
-                        className={classes(BotTagClasses.botTagVerified, BotTagClasses.botTagRegular, BotTagClasses.botTag, BotTagClasses.px, BotTagClasses.rem)}
+                        className={classes(botTag.botTagVerified, botTag.botTagRegular, botTag.botTag, botTag.px, botTag.rem)}
                         style={{ marginLeft: "4px" }}>
-                        <span className={BotTagClasses.botText}>
+                        <span className={botTag.botText}>
                             System
                         </span>
                     </span>
@@ -163,10 +163,10 @@ export default function ReviewComponent({ review, refetch, profileId }: { review
             </div>
 
             {review.id !== 0 && (
-                <div className={classes(ContainerClasses.container, ContainerClasses.isHeader, MessageClasses.buttons)} style={{
+                <div className={classes(container, isHeader, buttons)} style={{
                     padding: "0px",
                 }}>
-                    <div className={classes(ButtonClasses.wrapper, MessageClasses.buttonsInner)} >
+                    <div className={classes(buttonClasses.wrapper, buttonsInner)} >
                         {canReportReview(review) && <ReportButton onClick={reportRev} />}
                         {canBlockReviewAuthor(profileId, review) && <BlockButton isBlocked={isAuthorBlocked} onClick={blockReviewSender} />}
                         {canDeleteReview(profileId, review) && <DeleteButton onClick={delReview} />}
