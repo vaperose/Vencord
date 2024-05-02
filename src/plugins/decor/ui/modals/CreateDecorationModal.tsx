@@ -9,7 +9,7 @@ import { Link } from "@components/Link";
 import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { closeAllModals, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { findByProps,findComponentByCode } from "@webpack";
+import { findByProps, findComponentByCode } from "@webpack";
 import { Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Text, TextInput, useEffect, useMemo, UserStore, useState } from "@webpack/common";
 
 import { GUILD_ID, INVITE_KEY, RAW_SKU_ID } from "../../lib/constants";
