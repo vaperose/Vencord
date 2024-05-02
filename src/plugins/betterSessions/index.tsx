@@ -21,7 +21,7 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { findStore } from "@webpack";
+import { findByProps, findExportedComponent, findStore } from "@webpack";
 import { React, RestAPI, Tooltip } from "@webpack/common";
 
 import { RenameButton } from "./components/RenameButton";
