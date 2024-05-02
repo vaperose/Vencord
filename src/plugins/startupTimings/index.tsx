@@ -32,6 +32,5 @@ export default definePlugin({
             replace: '{section:"StartupTimings",label:"Startup Timings",element:$self.StartupTimingPage},$&'
         }
     }],
-
     StartupTimingPage
 });

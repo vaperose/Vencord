@@ -23,6 +23,9 @@ import { _resolveReady, filters, find, findByCode, findByProps, waitFor } from "
 import type * as t from "./types/utils";
 
 export const FluxDispatcher = find<t.FluxDispatcher>(filters.byProps("dispatch", "subscribe"), m => {
+    // Non import call to avoid circular dependency
+    Vencord.Plugins.subscribeAllPluginsFluxEvents(m);
+
     const cb = () => {
         m.unsubscribe("CONNECTION_OPEN", cb);
         _resolveReady();
@@ -34,7 +37,7 @@ export const FluxDispatcher = find<t.FluxDispatcher>(filters.byProps("dispatch",
 
 export const { ComponentDispatch } = findByProps("ComponentDispatch", "ComponentDispatcher");
 
-export const RestAPI = findByProps<t.RestAPI>("getAPIBaseURL", "get");
+export const RestAPI = find<t.RestAPI>(filters.byProps("getAPIBaseURL"), m => m.HTTP ?? m);
 export const moment = findByProps<typeof import("moment")>("parseTwoDigitYear");
 
 export const hljs = findByProps<typeof import("highlight.js")>("highlight", "registerLanguage");

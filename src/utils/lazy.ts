@@ -84,8 +84,11 @@ export function proxyLazy<T = any>(factory: () => T, attempts = 5, isChild = fal
                     attempts,
                     true
                 );
-
-            return Reflect.get(target[kGET](), p, receiver);
+            const lazyTarget = target[kGET]();
+            if (typeof lazyTarget === "object" || typeof lazyTarget === "function") {
+                return Reflect.get(lazyTarget, p, receiver);
+            }
+            throw new Error("proxyLazy called on a primitive value");
         }
     }) as T;
 }

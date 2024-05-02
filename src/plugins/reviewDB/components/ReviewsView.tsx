@@ -17,7 +17,7 @@
 */
 
 import { useAwaiter, useForceUpdater } from "@utils/react";
-import { findByProps,findComponentByCode } from "@webpack";
+import { findByProps, findComponentByCode } from "@webpack";
 import { Forms, React, RelationshipStore, useRef, UserStore } from "@webpack/common";
 
 import { Auth, authorize } from "../auth";
@@ -31,7 +31,7 @@ import ReviewComponent from "./ReviewComponent";
 const { Editor, Transforms } = findByProps("Editor", "Transforms");
 const { ChatInputTypes } = findByProps("ChatInputTypes");
 
-const InputComponent = findComponentByCode("default.CHANNEL_TEXT_AREA");
+const InputComponent = findComponentByCode("default.CHANNEL_TEXT_AREA", "input");
 const { createChannelRecordFromServer } = findByProps("createChannelRecordFromServer");
 
 interface UserProps {
