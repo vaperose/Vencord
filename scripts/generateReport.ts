@@ -508,10 +508,10 @@ async function runtime(token: string) {
                         searchType === "findComponent" ||
                         searchType === "waitFor"
                     ) {
-                        filterName = args[0].$$vencordProps.shift();
+                        filterName = args[0].$$vencordProps[0];
                     }
 
-                    parsedArgs = args[0].$$vencordProps;
+                    parsedArgs = args[0].$$vencordProps.slice(1);
                 }
 
                 if (
