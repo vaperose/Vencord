@@ -499,14 +499,34 @@ async function runtime(token: string) {
                 if (result == null) throw "find failed";
             } catch (e) {
                 let logMessage = searchType;
-                const parsedArgs: any[] = "$$vencordProps" in args[0] ? args[0].$$vencordProps : args;
+
+                let filterName = "";
+                let parsedArgs = args;
+                if ("$$vencordProps" in args[0]) {
+                    if (
+                        searchType === "find" ||
+                        searchType === "findComponent" ||
+                        searchType === "waitFor"
+                    ) {
+                        filterName = args[0].$$vencordProps.shift();
+                    }
+
+                    parsedArgs = args[0].$$vencordProps;
+                }
 
                 if (
-                    !("$$vencordProps" in args[0])
-                    && searchType === "waitFor" || searchType === "find" || searchType === "findComponent" || searchType === "webpackDependantLazy" || searchType === "webpackDependantLazyComponent"
-                ) logMessage += `(${parsedArgs[0].toString().slice(0, 147)}...)`;
-                else if (searchType === "extractAndLoadChunks") logMessage += `([${parsedArgs[0].map((arg: any) => `"${arg}"`).join(", ")}], ${parsedArgs[1].toString()})`;
-                else logMessage += `(${parsedArgs.map(arg => `"${arg}"`).join(", ")})`;
+                    parsedArgs === args && searchType === "waitFor" ||
+                    searchType === "find" ||
+                    searchType === "findComponent" ||
+                    searchType === "webpackDependantLazy" ||
+                    searchType === "webpackDependantLazyComponent"
+                ) {
+                    logMessage += `(${parsedArgs[0].toString().slice(0, 147)}...)`;
+                } else if (searchType === "extractAndLoadChunks") {
+                    logMessage += `([${parsedArgs[0].map((arg: any) => `"${arg}"`).join(", ")}], ${parsedArgs[1].toString()})`;
+                } else {
+                    logMessage += `(${filterName.length ? `${filterName}(` : ""}${parsedArgs.map(arg => `"${arg}"`).join(", ")})${filterName.length ? ")" : ""}`;
+                }
 
                 console.log("[PUP_WEBPACK_FIND_FAIL]", logMessage);
             }

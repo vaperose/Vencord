@@ -46,7 +46,7 @@ export const filters = {
             : m => props.every(p => m?.[p] !== void 0);
 
         // @ts-ignore
-        filter.$$vencordProps = props;
+        filter.$$vencordProps = ["byProps", ...props];
         return filter;
     },
 
@@ -60,14 +60,14 @@ export const filters = {
             return true;
         };
 
-        filter.$$vencordProps = code;
+        filter.$$vencordProps = ["byCode", ...code];
         return filter;
     },
 
     byStoreName: (name: string): FilterFn => {
         const filter = m => m?.constructor?.displayName === name;
 
-        filter.$$vencordProps = [name];
+        filter.$$vencordProps = ["byStoreName", name];
         return filter;
     },
 
@@ -82,7 +82,7 @@ export const filters = {
             return false;
         };
 
-        wrapper.$$vencordProps = code;
+        wrapper.$$vencordProps = ["componentByCode", ...code];
         return wrapper;
     }
 };
@@ -109,6 +109,15 @@ if (IS_DEV && IS_DISCORD_DESKTOP) {
 }
 
 export const webpackSearchHistory = [] as Array<["waitFor" | "find" | "findComponent" | "findExportedComponent" | "findComponentByCode" | "findByProps" | "findByCode" | "findStore" | "extractAndLoadChunks" | "webpackDependantLazy" | "webpackDependantLazyComponent", any[]]>;
+
+function printFilter(filter: FilterFn) {
+    if ("$$vencordProps" in filter) {
+        const props = filter.$$vencordProps as string[];
+        return `${props[0]}(${props.slice(1).map(arg => `"${arg}"`).join(", ")})`;
+    }
+
+    return filter.toString();
+}
 
 /**
  * Wait for the first module that matches the provided filter to be required,
@@ -158,7 +167,7 @@ export function find<T = any>(filter: FilterFn, callback: (mod: any) => any = m 
 
     if (IS_DEV && !isIndirect) webpackSearchHistory.push(["find", [filter]]);
 
-    const [proxy, setInnerValue] = proxyInner<T>(new Error(`Webpack find matched no module. Filter:\n${filter}`));
+    const [proxy, setInnerValue] = proxyInner<T>(new Error(`Webpack find matched no module. Filter: ${printFilter(filter)}`));
     waitFor(filter, mod => setInnerValue(callback(mod)), { isIndirect: true });
 
     if (proxy[proxyInnerValue] != null) return proxy[proxyInnerValue] as T;
@@ -184,7 +193,7 @@ export function findComponent<T extends object = any>(filter: FilterFn, parse: (
     const NoopComponent = (() => {
         if (!noMatchLogged) {
             noMatchLogged = true;
-            logger.error(`Webpack find matched no module. Filter:\n${filter}`);
+            logger.error(`Webpack find matched no module. Filter: ${printFilter(filter)}`);
         }
 
         return null;
@@ -223,13 +232,15 @@ export function findExportedComponent<T extends object = any>(...props: string[]
     const parse = (typeof props.at(-1) === "function" ? props.pop() : m => m) as (component: any) => React.ComponentType<T>;
     const newProps = props as string[];
 
+    const filter = filters.byProps(...newProps);
+
     if (IS_DEV) webpackSearchHistory.push(["findExportedComponent", props]);
 
     let noMatchLogged = false;
     const NoopComponent = (() => {
         if (!noMatchLogged) {
             noMatchLogged = true;
-            logger.error(`Webpack find matched no module. Filter:\n${props.join("\n")}`);
+            logger.error(`Webpack find matched no module. Filter: ${printFilter(filter)}`);
         }
 
         return null;
@@ -243,7 +254,7 @@ export function findExportedComponent<T extends object = any>(...props: string[]
 
     WrapperComponent.$$vencordGetter = () => InnerComponent;
 
-    waitFor(filters.byProps(...newProps), (v: any) => {
+    waitFor(filter, (v: any) => {
         const parsedComponent = parse(v[newProps[0]]);
         InnerComponent = parsedComponent;
         Object.assign(InnerComponent, parsedComponent);
@@ -372,6 +383,7 @@ export const cacheFindBulk = traceFunction("findBulk", function findBulk(...filt
         if (IS_DEV) {
             throw new Error("bulk called with only one filter. Use find");
         }
+
         return cacheFind(filterFns[0]);
     }
 
