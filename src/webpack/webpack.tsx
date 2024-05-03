@@ -111,31 +111,6 @@ if (IS_DEV && IS_DISCORD_DESKTOP) {
 export const webpackSearchHistory = [] as Array<["waitFor" | "find" | "findComponent" | "findExportedComponent" | "findComponentByCode" | "findByProps" | "findByCode" | "findStore" | "extractAndLoadChunks" | "webpackDependantLazy" | "webpackDependantLazyComponent", any[]]>;
 
 /**
- * Find the first already required module that matches the filter.
- * @param filter A function that takes a module and returns a boolean
- * @returns The found module or null
- */
-export const cacheFind = traceFunction("find", function find(filter: FilterFn) {
-    if (typeof filter !== "function")
-        throw new Error("Invalid filter. Expected a function got " + typeof filter);
-
-    for (const key in cache) {
-        const mod = cache[key];
-        if (!mod?.exports || mod.exports === window) continue;
-
-        if (filter(mod.exports)) {
-            return mod.exports;
-        }
-
-        if (mod.exports.default && filter(mod.exports.default)) {
-            return mod.exports.default;
-        }
-    }
-
-    return null;
-});
-
-/**
  * Wait for the first module that matches the provided filter to be required,
  * then call the callback with the module as the first argument.
  *
@@ -330,6 +305,32 @@ export function findStore<T = any>(name: string) {
 
     return find<T>(filters.byStoreName(name), m => m, { isIndirect: true });
 }
+
+/**
+ * Find the first already required module that matches the filter.
+ * @param filter A function that takes a module and returns a boolean
+ * @returns The found module or null
+ */
+export const cacheFind = traceFunction("find", function find(filter: FilterFn) {
+    if (typeof filter !== "function")
+        throw new Error("Invalid filter. Expected a function got " + typeof filter);
+
+    for (const key in cache) {
+        const mod = cache[key];
+        if (!mod?.exports || mod.exports === window) continue;
+
+        if (filter(mod.exports)) {
+            return mod.exports;
+        }
+
+        if (mod.exports.default && filter(mod.exports.default)) {
+            return mod.exports.default;
+        }
+    }
+
+    return null;
+});
+
 
 export function cacheFindAll(filter: FilterFn) {
     if (typeof filter !== "function")
