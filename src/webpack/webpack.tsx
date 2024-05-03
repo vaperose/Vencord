@@ -21,7 +21,6 @@ import { LazyComponent } from "@utils/lazyReact";
 import { Logger } from "@utils/Logger";
 import { canonicalizeMatch } from "@utils/patches";
 import { proxyInner, proxyInnerValue } from "@utils/proxyInner";
-import { NoopComponent } from "@utils/react";
 import type { WebpackInstance } from "discord-types/other";
 
 import { traceFunction } from "../debug/Tracer";
@@ -109,23 +108,14 @@ if (IS_DEV && IS_DISCORD_DESKTOP) {
     }, 0);
 }
 
-export const webpackSearchHistory = [] as Array<["waitFor" | "find" | "findComponent" | "findExportedComponent" | "findComponentByCode" | "findByProps" | "findByCode" | "findStore" | "extractAndLoadChunks" | "proxyLazyWebpack" | "LazyComponentWebpack", any[]]>;
-
-function handleModuleNotFound(method: string, ...filter: unknown[]) {
-    const err = new Error(`webpack.${method} found no module`);
-    logger.error(err, "Filter:", filter);
-
-    // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-    if (IS_DEV && !devToolsOpen)
-        throw err;
-}
+export const webpackSearchHistory = [] as Array<["waitFor" | "find" | "findComponent" | "findExportedComponent" | "findComponentByCode" | "findByProps" | "findByCode" | "findStore" | "extractAndLoadChunks" | "webpackDependantLazy" | "webpackDependantLazyComponent", any[]]>;
 
 /**
  * Find the first already required module that matches the filter.
  * @param filter A function that takes a module and returns a boolean
  * @returns The found module or null
  */
-export const cacheFind = traceFunction("find", function find(filter: FilterFn, { isIndirect = false }: { isIndirect?: boolean; } = {}) {
+export const cacheFind = traceFunction("find", function find(filter: FilterFn) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
@@ -140,10 +130,6 @@ export const cacheFind = traceFunction("find", function find(filter: FilterFn, {
         if (mod.exports.default && filter(mod.exports.default)) {
             return mod.exports.default;
         }
-    }
-
-    if (!isIndirect) {
-        handleModuleNotFound("find", filter);
     }
 
     return null;
@@ -166,7 +152,7 @@ export function waitFor(filter: FilterFn, callback: ModCallbackFn, { isIndirect 
     if (IS_DEV && !isIndirect) webpackSearchHistory.push(["waitFor", [filter]]);
 
     if (cache != null) {
-        const existing = cacheFind(filter, { isIndirect: true });
+        const existing = cacheFind(filter);
         if (existing) return callback(existing);
     }
 
@@ -197,7 +183,7 @@ export function find<T = any>(filter: FilterFn, callback: (mod: any) => any = m 
 
     if (IS_DEV && !isIndirect) webpackSearchHistory.push(["find", [filter]]);
 
-    const [proxy, setInnerValue] = proxyInner<T>();
+    const [proxy, setInnerValue] = proxyInner<T>(new Error(`Webpack find matched no module. Filter:\n${filter}`));
     waitFor(filter, mod => setInnerValue(callback(mod)), { isIndirect: true });
 
     if (proxy[proxyInnerValue] != null) return proxy[proxyInnerValue] as T;
@@ -219,7 +205,17 @@ export function findComponent<T extends object = any>(filter: FilterFn, parse: (
 
     if (IS_DEV && !isIndirect) webpackSearchHistory.push(["findComponent", [filter]]);
 
-    let InnerComponent = NoopComponent as React.ComponentType<T>;
+    let noMatchLogged = false;
+    const NoopComponent = (() => {
+        if (!noMatchLogged) {
+            noMatchLogged = true;
+            logger.error(`Webpack find matched no module. Filter:\n${filter}`);
+        }
+
+        return null;
+    }) as React.ComponentType<T>;
+
+    let InnerComponent = NoopComponent;
 
     const WrapperComponent = (props: T) => {
         return <InnerComponent {...props} />;
@@ -254,7 +250,17 @@ export function findExportedComponent<T extends object = any>(...props: string[]
 
     if (IS_DEV) webpackSearchHistory.push(["findExportedComponent", props]);
 
-    let InnerComponent = NoopComponent as React.ComponentType<T>;
+    let noMatchLogged = false;
+    const NoopComponent = (() => {
+        if (!noMatchLogged) {
+            noMatchLogged = true;
+            logger.error(`Webpack find matched no module. Filter:\n${props.join("\n")}`);
+        }
+
+        return null;
+    }) as React.ComponentType<T>;
+
+    let InnerComponent = NoopComponent;
 
     const WrapperComponent = (props: T) => {
         return <InnerComponent {...props} />;
@@ -325,7 +331,7 @@ export function findStore<T = any>(name: string) {
     return find<T>(filters.byStoreName(name), m => m, { isIndirect: true });
 }
 
-export function findAll(filter: FilterFn) {
+export function cacheFindAll(filter: FilterFn) {
     if (typeof filter !== "function")
         throw new Error("Invalid filter. Expected a function got " + typeof filter);
 
@@ -334,11 +340,13 @@ export function findAll(filter: FilterFn) {
         const mod = cache[key];
         if (!mod?.exports) continue;
 
-        if (filter(mod.exports))
+        if (filter(mod.exports)) {
             ret.push(mod.exports);
+        }
 
-        if (mod.exports.default && filter(mod.exports.default))
+        if (mod.exports.default && filter(mod.exports.default)) {
             ret.push(mod.exports.default);
+        }
     }
 
     return ret;
@@ -347,10 +355,10 @@ export function findAll(filter: FilterFn) {
 /**
  * Same as {@link cacheFind} but in bulk
  * @param filterFns Array of filters. Please note that this array will be modified in place, so if you still
- *                need it afterwards, pass a copy.
+ *                  need it afterwards, pass a copy.
  * @returns Array of results in the same order as the passed filters
  */
-export const findBulk = traceFunction("findBulk", function findBulk(...filterFns: FilterFn[]) {
+export const cacheFindBulk = traceFunction("findBulk", function findBulk(...filterFns: FilterFn[]) {
     if (!Array.isArray(filterFns))
         throw new Error("Invalid filters. Expected function[] got " + typeof filterFns);
 
@@ -395,12 +403,14 @@ export const findBulk = traceFunction("findBulk", function findBulk(...filterFns
 
     if (found !== length) {
         const err = new Error(`Got ${length} filters, but only found ${found} modules!`);
-        if (IS_DEV) {
-            if (!devToolsOpen)
-                // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-                throw err;
-        } else {
+
+        if (!IS_DEV) {
             logger.warn(err);
+            return results;
+        }
+
+        if (!devToolsOpen) {
+            throw err; // Strict behaviour in DevBuilds to fail early and make sure the issue is found
         }
     }
 
@@ -423,12 +433,13 @@ export const findModuleId = traceFunction("findModuleId", function findModuleId(
     }
 
     const err = new Error("Didn't find module with code(s):\n" + code.join("\n"));
-    if (IS_DEV) {
-        if (!devToolsOpen)
-            // Strict behaviour in DevBuilds to fail early and make sure the issue is found
-            throw err;
-    } else {
+    if (!IS_DEV) {
         logger.warn(err);
+        return null;
+    }
+
+    if (!devToolsOpen) {
+        throw err; // Strict behaviour in DevBuilds to fail early and make sure the issue is found
     }
 
     return null;
@@ -448,14 +459,14 @@ export function findModuleFactory(...code: string[]) {
 /**
  * This is just a wrapper around {@link proxyLazy} to make our reporter test for your webpack finds.
  *
- * Wraps the result of {@link makeLazy} in a Proxy you can consume as if it wasn't lazy.
- * On first property access, the lazy is evaluated
- * @param factory lazy factory
- * @param attempts how many times to try to evaluate the lazy before giving up
- * @returns Proxy
+ * Wraps the result of factory in a Proxy you can consume as if it wasn't lazy.
+ * On first property access, the factory is evaluated
+ * @param factory Factory returning the result
+ * @param attempts How many times to try to evaluate the factory before giving up
+ * @returns Result of factory function
  */
-export function proxyLazyWebpack<T = any>(factory: () => any, attempts?: number) {
-    if (IS_DEV) webpackSearchHistory.push(["proxyLazyWebpack", [factory]]);
+export function webpackDependantLazy<T = any>(factory: () => any, attempts?: number) {
+    if (IS_DEV) webpackSearchHistory.push(["webpackDependantLazy", [factory]]);
 
     return proxyLazy<T>(factory, attempts);
 }
@@ -468,8 +479,8 @@ export function proxyLazyWebpack<T = any>(factory: () => any, attempts?: number)
  * @param attempts How many times to try to get the component before giving up
  * @returns Result of factory function
  */
-export function LazyComponentWebpack<T extends object = any>(factory: () => any, attempts?: number) {
-    if (IS_DEV) webpackSearchHistory.push(["LazyComponentWebpack", [factory]]);
+export function webpackDependantLazyComponent<T extends object = any>(factory: () => any, attempts?: number) {
+    if (IS_DEV) webpackSearchHistory.push(["webpackDependantLazyComponent", [factory]]);
 
     return LazyComponent<T>(factory, attempts);
 }
